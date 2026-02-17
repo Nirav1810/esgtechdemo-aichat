@@ -63,9 +63,7 @@ const cleanLatex = (content: string): string => {
 // API Configuration - prefer primary key, fall back to legacy env or fallback key
 const PRIMARY_API_KEY = process.env.NEXT_PUBLIC_OPENROUTER_PRIMARY_KEY || "";
 const FALLBACK_API_KEY =
-  process.env.NEXT_PUBLIC_OPENROUTER_FALLBACK_KEY ||
-  process.env.NEXT_PUBLIC_OPENROUTER_API_KEY ||
-  "";
+  process.env.NEXT_PUBLIC_OPENROUTER_FALLBACK_KEY || "";
 const API_KEY = PRIMARY_API_KEY || FALLBACK_API_KEY;
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const MODEL = "openai/gpt-oss-120b:free";
