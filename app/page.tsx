@@ -69,7 +69,39 @@ const FALLBACK_API_KEY =
 const API_KEY = PRIMARY_API_KEY || FALLBACK_API_KEY;
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const MODEL = "openai/gpt-oss-120b:free";
-const MAX_TOKENS = 8000;
+
+type ResponseModeKey = "short" | "standard";
+
+interface ResponseModeConfig {
+  label: string;
+  description: string;
+  reminder: string;
+  maxTokens: number;
+  temperature: number;
+  presencePenalty: number;
+  streamCharLimit?: number;
+}
+
+const RESPONSE_MODES: Record<ResponseModeKey, ResponseModeConfig> = {
+  short: {
+    label: "Concise",
+    description: "<=10 sentences (~240 words) with bold summary + bullet list.",
+    reminder:
+      "Respond in no more than ten purposeful sentences (~240 words). Start with a bold single-sentence headline, follow with a bulleted list that uses bold numbers/metrics, and finish with an italicized CTA sentence. Always use Markdown formatting and keep content tightly tied to the provided data.",
+    maxTokens: 720,
+    temperature: 0.5,
+    presencePenalty: -0.05,
+  },
+  standard: {
+    label: "Standard",
+    description: "Structured briefing (~320 words) with styled sections.",
+    reminder:
+      "Deliver a balanced answer within 14-15 sentences (~320 words) tied to the data. Use Markdown: start with a bold summary sentence, add a numbered list where each item names the lever, cites metrics in **bold**, and ends with an italic outlook sentence that highlights the expected impact or risk.",
+    maxTokens: 1200,
+    temperature: 0.5,
+    presencePenalty: 0,
+  },
+};
 
 // Types
 interface Message {
@@ -385,6 +417,7 @@ const AISidebar = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [askedQuestions, setAskedQuestions] = useState<string[]>([]);
+  const [responseMode, setResponseMode] = useState<ResponseModeKey>("short");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const streamingMessageIndexRef = useRef<number | null>(null);
 
@@ -448,7 +481,10 @@ const AISidebar = ({
   // Show examples if there are remaining ones and user isn't typing
   const showExamples = remainingExamples.length > 0 && inputMessage.length === 0;
 
-  const handleStream = async (body: ReadableStream<Uint8Array> | null) => {
+  const handleStream = async (
+    body: ReadableStream<Uint8Array> | null,
+    charLimit?: number
+  ) => {
     if (!body) {
       throw new Error("Streaming not supported by this browser");
     }
@@ -458,6 +494,8 @@ const AISidebar = ({
     let buffer = "";
     let received = false;
     let doneReading = false;
+    let totalChars = 0;
+    let truncated = false;
 
     while (!doneReading) {
       const { value, done } = await reader.read();
@@ -489,20 +527,42 @@ const AISidebar = ({
             if (chunk) {
               appendToStreamingMessage(chunk);
               received = true;
+              totalChars += chunk.length;
+              if (charLimit && totalChars >= charLimit) {
+                truncated = true;
+                doneReading = true;
+                try {
+                  await reader.cancel("char limit reached");
+                } catch (cancelError) {
+                  console.warn("Stream cancel warning", cancelError);
+                }
+                break;
+              }
             }
           } catch (error) {
             console.error("Error parsing stream chunk", error);
           }
         }
+        if (doneReading) break;
       }
     }
 
     if (!received) {
       throw new Error("Empty response from AI model");
     }
+
+    if (truncated) {
+      appendToStreamingMessage(
+        "\n\n...Response shortened for brevity. Ask for more detail if needed."
+      );
+    }
   };
 
-  const streamModelResponse = async (model: string, question: string) => {
+  const streamModelResponse = async (
+    model: string,
+    question: string,
+    modeConfig: ResponseModeConfig
+  ) => {
     console.log(`Trying model: ${model}`);
 
     const response = await fetch(API_URL, {
@@ -522,20 +582,23 @@ const AISidebar = ({
 
 CRITICAL INSTRUCTION: You MUST respond ONLY in English. Do NOT use any other language including Chinese, Korean, Japanese, or any other language. All responses must be in clear, professional English.
 
-You have access to the current dashboard data which will be provided in each user message. Analyze this data professionally and provide actionable recommendations.`,
+You have access to the current dashboard data which will be provided in each user message. Analyze this data professionally and provide actionable recommendations.
+
+RESPONSE STYLE: ${modeConfig.reminder} If the user explicitly requests additional depth, acknowledge the default brevity first and then expand while staying on topic and avoiding filler.`,
           },
           {
             role: "user",
             content: `Here is the current dashboard context data:
 ${contextData}
 
-IMPORTANT: Respond in English only.
+IMPORTANT: Respond in English only. ${modeConfig.reminder}
 
 User question: ${question}`,
           },
         ],
-        temperature: 0.7,
-        max_tokens: MAX_TOKENS,
+        temperature: modeConfig.temperature,
+        presence_penalty: modeConfig.presencePenalty,
+        max_tokens: modeConfig.maxTokens,
         stream: true,
       }),
     });
@@ -548,7 +611,7 @@ User question: ${question}`,
 
     const contentType = response.headers.get("content-type") || "";
     if (contentType.includes("text/event-stream")) {
-      await handleStream(response.body);
+      await handleStream(response.body, modeConfig.streamCharLimit);
       return;
     }
 
@@ -586,6 +649,7 @@ User question: ${question}`,
 
     startAssistantMessage();
     setIsLoading(true);
+    const modeConfig = RESPONSE_MODES[responseMode];
 
     const models = [
       MODEL,
@@ -597,7 +661,7 @@ User question: ${question}`,
 
     for (const model of models) {
       try {
-        await streamModelResponse(model, trimmedQuestion);
+        await streamModelResponse(model, trimmedQuestion, modeConfig);
         setIsLoading(false);
         clearStreamingMessage();
         return;
@@ -667,6 +731,39 @@ User question: ${question}`,
         >
           <X className="w-5 h-5" />
         </button>
+      </div>
+
+      <div className="px-4 py-3 border-b border-gray-200 bg-white flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+            Response Style
+          </p>
+          <span className="text-xs text-gray-500">
+            {RESPONSE_MODES[responseMode].label}
+          </span>
+        </div>
+        <div className="flex gap-2">
+          {(["short", "standard"] as ResponseModeKey[]).map((modeKey) => {
+            const mode = RESPONSE_MODES[modeKey];
+            const isActive = responseMode === modeKey;
+            return (
+              <button
+                key={modeKey}
+                onClick={() => setResponseMode(modeKey)}
+                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                  isActive
+                    ? "bg-emerald-600 border-emerald-600 text-white"
+                    : "bg-white border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700"
+                }`}
+              >
+                {mode.label}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-xs text-gray-500">
+          {RESPONSE_MODES[responseMode].description}
+        </p>
       </div>
 
       {/* Messages */}
