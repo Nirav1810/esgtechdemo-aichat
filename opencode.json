@@ -1,0 +1,46 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "openrouter/auto",
+  "autoupdate": true,
+
+  "mcp": {
+
+    "filesystem": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "E:\\ESG AI"]
+    },
+
+    "git": {
+      "type": "local",
+      "command": ["npx", "-y", "mcp-git"]
+    },
+
+    "terminal": {
+      "type": "local",
+      "command": ["npx", "-y", "mcp-shell"]
+    },
+
+    "sequential-thinking": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+
+
+    "fetch": {
+      "type": "local",
+      "command": ["npx", "-y", "mcp-fetch"]
+    },
+
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp"]
+    },
+
+
+    "memory": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-memory"]
+    }
+
+  }
+}

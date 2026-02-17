@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* Markdown table styles for AI chat - with horizontal scrolling */
+.prose .overflow-x-auto {
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Custom scrollbar for tables */
+.prose .overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.prose .overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.prose .overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 4px;
+}
+
+.prose .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Firefox scrollbar */
+.prose .overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 #f1f5f9;
+}
+
+.prose table {
+  width: auto;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.prose table th,
+.prose table td {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.prose table th {
+  background-color: #f8fafc;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.prose table td {
+  color: #334155;
+}
+
+.prose table tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+.prose table tr:hover {
+  background-color: #f1f5f9;
+}
