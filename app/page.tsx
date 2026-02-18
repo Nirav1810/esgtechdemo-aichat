@@ -20,8 +20,6 @@ import {
   MessageCircle,
   X,
   Send,
-  ChevronDown,
-  ChevronUp,
   Settings,
   BarChart3,
   Leaf,
@@ -520,7 +518,9 @@ const AISidebar = ({
 
 CRITICAL INSTRUCTION: You MUST respond ONLY in English. Do NOT use any other language including Chinese, Korean, Japanese, or any other language. All responses must be in clear, professional English.
 
-You have access to the current dashboard data which will be provided in each user message. Analyze this data professionally and provide actionable recommendations.`,
+You have access to the current dashboard data which will be provided in each user message. Only analyze or summarize this data when the user explicitly asks for a summary, insights, or asks a question that requires the data. If the user greets or makes small talk, respond briefly and do not summarize the dashboard data.
+
+Keep responses concise and precise. Default to 3-6 sentences or 4-6 bullet points. Avoid long explanations, repetition, or unnecessary detail unless the user asks for more depth. End the answer once the user’s request is satisfied.`,
           },
           {
             role: "user",
@@ -788,53 +788,6 @@ User question: ${question}`,
           </p>
         )}
       </div>
-    </div>
-  );
-};
-
-// Developer Context Panel Component
-const DeveloperPanel = ({
-  contextData,
-  setContextData,
-}: {
-  contextData: string;
-  setContextData: (data: string) => void;
-}) => {
-  const [isOpen, setIsOpen] = useState(true);
-
-  return (
-    <div className="bg-gray-900 text-white rounded-t-xl overflow-hidden">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 flex items-center justify-between bg-gray-800 hover:bg-gray-700 transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-          <span className="font-medium text-sm">Developer Data Context</span>
-          <span className="text-xs text-gray-400">
-            (Live Dashboard Data - System Prompt)
-          </span>
-        </div>
-        {isOpen ? (
-          <ChevronDown className="w-5 h-5" />
-        ) : (
-          <ChevronUp className="w-5 h-5" />
-        )}
-      </button>
-      {isOpen && (
-        <div className="p-4">
-          <p className="text-xs text-gray-400 mb-2">
-            Edit this JSON to simulate different dashboard states. The AI will
-            receive this data with every message.
-          </p>
-          <textarea
-            value={contextData}
-            onChange={(e) => setContextData(e.target.value)}
-            className="w-full h-48 bg-gray-800 border border-gray-700 rounded-lg p-3 font-mono text-xs text-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y"
-            spellCheck={false}
-          />
-        </div>
-      )}
     </div>
   );
 };
@@ -1304,13 +1257,6 @@ export default function ESGDashboard() {
               </div>
             </div>
 
-            {/* Developer Context Panel */}
-            <div className="mt-8">
-              <DeveloperPanel
-                contextData={contextData}
-                setContextData={setContextData}
-              />
-            </div>
           </div>
         </div>
       </main>
