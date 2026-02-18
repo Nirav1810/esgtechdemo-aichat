@@ -63,9 +63,7 @@ const PRIMARY_API_KEY = process.env.NEXT_PUBLIC_OPENROUTER_PRIMARY_KEY || "";
 const FALLBACK_API_KEY =
   process.env.NEXT_PUBLIC_OPENROUTER_FALLBACK_KEY || "";
 const API_KEY = PRIMARY_API_KEY || FALLBACK_API_KEY;
-const API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const MODEL = "openai/gpt-oss-120b:free";
-const MAX_TOKENS = 8000;
+const API_URL = "/api/chat";
 
 // Types
 interface Message {
@@ -498,49 +496,23 @@ const AISidebar = ({
     }
   };
 
-  const streamModelResponse = async (model: string, question: string) => {
-    console.log(`Trying model: ${model}`);
+  const streamModelResponse = async (question: string) => {
+    console.log("Sending question to backend /api/chat");
 
     const response = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${API_KEY}`,
-        "HTTP-Referer": "http://localhost:3000",
-        "X-Title": "ESGtech.ai Dashboard",
       },
       body: JSON.stringify({
-        model,
-        messages: [
-          {
-            role: "system",
-            content: `You are an expert ESG (Environmental, Social, and Governance) consultant assistant. You help users understand their greenhouse gas emissions data, provide sustainability insights, and suggest improvements.
-
-CRITICAL INSTRUCTION: You MUST respond ONLY in English. Do NOT use any other language including Chinese, Korean, Japanese, or any other language. All responses must be in clear, professional English.
-
-You have access to the current dashboard data which will be provided in each user message. Only analyze or summarize this data when the user explicitly asks for a summary, insights, or asks a question that requires the data. If the user greets or makes small talk, respond briefly and do not summarize the dashboard data.
-
-Keep responses concise and precise. Default to 3-6 sentences or 4-6 bullet points. Avoid long explanations, repetition, or unnecessary detail unless the user asks for more depth. End the answer once the user’s request is satisfied.`,
-          },
-          {
-            role: "user",
-            content: `Here is the current dashboard context data:
-${contextData}
-
-IMPORTANT: Respond in English only.
-
-User question: ${question}`,
-          },
-        ],
-        temperature: 0.7,
-        max_tokens: MAX_TOKENS,
-        stream: true,
+        question,
+        contextData,
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error(`API Error for ${model}:`, errorData);
+      console.error("API Error from /api/chat:", errorData);
       throw new Error(`API Error: ${response.status}`);
     }
 
@@ -552,11 +524,19 @@ User question: ${question}`,
 
     const data = await response.json();
     if (data.error) {
-      console.error(`OpenRouter Error for ${model}:`, data.error);
-      throw new Error(data.error.message || "API returned an error");
+      console.error("Backend error from /api/chat:", data.error);
+      throw new Error(
+        typeof data.error === "string"
+          ? data.error
+          : data.error.message || "API returned an error"
+      );
     }
 
-    const aiResponse = data.choices?.[0]?.message?.content;
+    const aiResponse =
+      data.answer ||
+      data.content ||
+      data.message ||
+      data.choices?.[0]?.message?.content;
     if (!aiResponse || aiResponse.trim() === "") {
       throw new Error("Empty response from AI model");
     }
@@ -585,34 +565,18 @@ User question: ${question}`,
     startAssistantMessage();
     setIsLoading(true);
 
-    const models = [
-      MODEL,
-      "upstage/solar-pro-3:free",
-      "meta-llama/llama-3.1-8b-instruct:free",
-      "google/gemini-flash-1.5:free",
-    ];
-    let lastError = "";
-
-    for (const model of models) {
-      try {
-        await streamModelResponse(model, trimmedQuestion);
-        setIsLoading(false);
-        clearStreamingMessage();
-        return;
-      } catch (error) {
-        console.error(`Error with model ${model}:`, error);
-        lastError = error instanceof Error ? error.message : "Unknown error";
-        setStreamingMessageContent("");
-        continue;
-      }
+    try {
+      await streamModelResponse(trimmedQuestion);
+      setIsLoading(false);
+      clearStreamingMessage();
+    } catch (error) {
+      console.error("Error while contacting AI backend", error);
+      setStreamingMessageContent(
+        "⚠️ Error: Unable to get a response right now. Please try again in a moment."
+      );
+      clearStreamingMessage();
+      setIsLoading(false);
     }
-
-    console.error("All models failed");
-    setStreamingMessageContent(
-      `⚠️ Error: ${lastError}. All available models failed. Please try again in a moment.`
-    );
-    clearStreamingMessage();
-    setIsLoading(false);
   };
 
   const handleExampleClick = async (question: string) => {
