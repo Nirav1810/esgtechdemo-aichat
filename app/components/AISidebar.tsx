@@ -167,7 +167,7 @@ const AnalysisCard = ({ data, isStreaming = false }: { data: AnalysisData; isStr
             </div>
             <h4 className="font-semibold text-emerald-800">Positives</h4>
             {isStreaming && data.positives.length === 0 && (
-              <span className="text-xs text-emerald-600 animate-pulse">thinking...</span>
+              <span className="text-xs text-emerald-600 animate-pulse">Analysing...</span>
             )}
           </div>
           {data.positives.length > 0 ? (
@@ -197,7 +197,7 @@ const AnalysisCard = ({ data, isStreaming = false }: { data: AnalysisData; isStr
             </div>
             <h4 className="font-semibold text-red-800">Negatives</h4>
             {isStreaming && data.negatives.length === 0 && (
-              <span className="text-xs text-red-600 animate-pulse">thinking...</span>
+              <span className="text-xs text-red-600 animate-pulse">Analysing...</span>
             )}
           </div>
           {data.negatives.length > 0 ? (
