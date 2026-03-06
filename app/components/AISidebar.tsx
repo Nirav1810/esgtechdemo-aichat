@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useId } from "react";
-import { MessageCircle, X, Send, Leaf, AlertTriangle } from "lucide-react";
+import Image from "next/image";
+import { MessageCircle, X, Send, Leaf, AlertTriangle, Download, Paperclip, FileText, Image as ImageIcon } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -15,11 +16,81 @@ interface AnalysisData {
 
 // API Configuration
 const API_URL = "/api/chat";
+const IMAGE_API_URL = "/api/image-generate";
+const MAX_FILES = 5;
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+const IMAGE_GENERATION_MODELS = [
+  "hunyuan-image-3",
+  "z-image-turbo",
+  "FLUX.1-schnell",
+  "Qwen-Image-2512",
+];
+const ASK_AI_MODELS = [
+  "Qwen/Qwen3-32B",
+  "Qwen/Qwen3-235B-A22B-Instruct-2507-TEE",
+  "deepseek-ai/DeepSeek-V3.2-TEE",
+  "NousResearch/Hermes-4-405B-FP8-TEE",
+  "zai-org/GLM-4.7-TEE",
+];
+const TEXTAREA_MIN_HEIGHT = 44;
+const TEXTAREA_MAX_HEIGHT = 120;
+
+const isSupportedUpload = (file: File): boolean => {
+  const mime = (file.type || "").toLowerCase();
+  const extension = file.name.split(".").pop()?.toLowerCase() || "";
+  const supportedText = new Set(["txt", "md", "csv", "json", "log", "pdf"]);
+  const supportedImages = new Set(["png", "jpg", "jpeg", "webp", "gif"]);
+  return (
+    mime.startsWith("image/") ||
+    mime.startsWith("text/") ||
+    mime === "application/pdf" ||
+    mime === "application/json" ||
+    supportedText.has(extension) ||
+    supportedImages.has(extension)
+  );
+};
+
+const formatBytes = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const readFileAsDataUrl = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+      } else {
+        reject(new Error("Failed to generate image preview."));
+      }
+    };
+    reader.onerror = () => reject(new Error("Failed to read image file."));
+    reader.readAsDataURL(file);
+  });
 
 interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  generatedImageDataUrl?: string;
+  generatedImageMimeType?: string;
+  generatedImageModel?: string;
+  attachments?: {
+    name: string;
+    size: number;
+    kind: "image" | "document";
+    previewDataUrl?: string;
+  }[];
+}
+
+interface ComposerAttachment {
+  file: File;
+  name: string;
+  size: number;
+  kind: "image" | "document";
+  previewDataUrl?: string;
 }
 
 interface AISidebarProps {
@@ -80,19 +151,19 @@ const ghgReportExamples = [
 const parseAnalysisData = (content: string): AnalysisData | null => {
   try {
     let trimmed = content.trim();
-    
+
     // Remove markdown code fences if present (```json ... ```)
     const codeBlockMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (codeBlockMatch) {
       trimmed = codeBlockMatch[1].trim();
     }
-    
+
     // Check if content looks like JSON
     if (trimmed.startsWith("{")) {
       // For partial JSON during streaming, try to parse what we have
       // Remove any trailing incomplete content
       let jsonToParse = trimmed;
-      
+
       // Find the last complete string/array/object
       // This is a best-effort approach for streaming JSON
       if (!trimmed.endsWith("}")) {
@@ -101,7 +172,7 @@ const parseAnalysisData = (content: string): AnalysisData | null => {
         const lastBracket = trimmed.lastIndexOf("]");
         const lastQuote = trimmed.lastIndexOf('"');
         const lastValidEnd = Math.max(lastBrace, lastBracket, lastQuote);
-        
+
         if (lastValidEnd > 0) {
           // Try parsing up to the last valid closing character
           jsonToParse = trimmed.substring(0, lastValidEnd + 1);
@@ -111,10 +182,10 @@ const parseAnalysisData = (content: string): AnalysisData | null => {
           }
         }
       }
-      
+
       try {
         const parsed = JSON.parse(jsonToParse);
-        
+
         // Validate the structure - be more lenient during streaming
         if (parsed.format === "analysis") {
           return {
@@ -144,11 +215,16 @@ const parseAnalysisData = (content: string): AnalysisData | null => {
 };
 
 // Analysis Card Component - renders positives in green, negatives in red
-const AnalysisCard = ({ data, isStreaming = false }: { data: AnalysisData; isStreaming?: boolean }) => {
-  // Only show sections that have data or are still loading
+const AnalysisCard = ({
+  data,
+  isStreaming = false,
+}: {
+  data: AnalysisData;
+  isStreaming?: boolean;
+}) => {
   const showPositives = data.positives.length > 0 || isStreaming;
   const showNegatives = data.negatives.length > 0 || isStreaming;
-  
+
   return (
     <div className="space-y-4">
       {/* Summary */}
@@ -234,13 +310,21 @@ export default function AISidebar({
   const exampleQuestions =
     pageType === "dashboard" ? dashboardExamples : ghgReportExamples;
 
-  const [messages, setMessages] = useState<Message[]>([
+  const [chatMessages, setChatMessages] = useState<Message[]>([
     {
       role: "assistant",
       content:
         pageType === "dashboard"
-          ? "Hello! I'm your ESG AI Assistant powered by GPT-OSS-120B. Ask me anything about your GHG emissions data, sustainability metrics, or how to improve your environmental impact."
-          : "Hello! I'm your GHG Report AI Assistant powered by GPT-OSS-120B. I can help you summarize emissions data, explain specific emission categories, compare scopes, or analyze any field in this report. What would you like to know?",
+          ? "Hello! I'm your ESG AI Assistant. Ask me anything about your GHG emissions data, sustainability metrics, or how to improve your environmental impact."
+          : "Hello! I'm your GHG Report AI Assistant. I can help you summarize emissions data, explain specific emission categories, compare scopes, or analyze any field in this report. What would you like to know?",
+      timestamp: new Date(),
+    },
+  ]);
+  const [imageMessages, setImageMessages] = useState<Message[]>([
+    {
+      role: "assistant",
+      content:
+        "Hello! I'm your Image Generator. Describe what you want, or attach a reference image and I will create a variation.",
       timestamp: new Date(),
     },
   ]);
@@ -248,20 +332,73 @@ export default function AISidebar({
   const [isLoading, setIsLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [askedQuestions, setAskedQuestions] = useState<string[]>([]);
+  const [isGeneratingPPT, setIsGeneratingPPT] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<ComposerAttachment[]>([]);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [selectedImageModel, setSelectedImageModel] = useState<string>(
+    IMAGE_GENERATION_MODELS[0]
+  );
+  const [selectedAskModel, setSelectedAskModel] = useState<string>(
+    ASK_AI_MODELS[0]
+  );
+  const [interactionMode, setInteractionMode] = useState<"chat" | "image">(
+    "chat"
+  );
+  const [loadingLabel, setLoadingLabel] = useState<string>("Analysing");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const streamingMessageIndexRef = useRef<number | null>(null);
+  const streamingModeRef = useRef<"chat" | "image" | null>(null);
   const isStreamingJSONRef = useRef<boolean>(false);
   const streamedContentRef = useRef<string>("");
 
-  const startAssistantMessage = () => {
+  const resizeTextarea = (element: HTMLTextAreaElement) => {
+    if (!element.value.trim()) {
+      element.style.height = `${TEXTAREA_MIN_HEIGHT}px`;
+      element.style.overflowY = "hidden";
+      return;
+    }
+
+    element.style.height = "auto";
+    const targetHeight = Math.min(
+      Math.max(element.scrollHeight, TEXTAREA_MIN_HEIGHT),
+      TEXTAREA_MAX_HEIGHT
+    );
+    element.style.height = `${targetHeight}px`;
+    element.style.overflowY =
+      element.scrollHeight > TEXTAREA_MAX_HEIGHT ? "auto" : "hidden";
+  };
+
+  const updateMessagesForMode = (
+    mode: "chat" | "image",
+    updater: (prev: Message[]) => Message[]
+  ) => {
+    if (mode === "chat") {
+      setChatMessages(updater);
+      return;
+    }
+    setImageMessages(updater);
+  };
+
+  const activeMessages = interactionMode === "chat" ? chatMessages : imageMessages;
+
+  const resetTextareaHeight = () => {
+    if (!textareaRef.current) return;
+    textareaRef.current.style.height = `${TEXTAREA_MIN_HEIGHT}px`;
+    textareaRef.current.style.overflowY = "hidden";
+  };
+
+  const startAssistantMessage = (mode: "chat" | "image") => {
     const placeholder: Message = {
       role: "assistant",
       content: "",
       timestamp: new Date(),
     };
-    setMessages((prev) => {
+    updateMessagesForMode(mode, (prev) => {
       const updated = [...prev, placeholder];
       streamingMessageIndexRef.current = updated.length - 1;
+      streamingModeRef.current = mode;
       return updated;
     });
     // Reset JSON detection refs
@@ -270,9 +407,10 @@ export default function AISidebar({
   };
 
   const updateStreamingMessage = (updater: (msg: Message) => Message) => {
+    const mode = streamingModeRef.current;
     const index = streamingMessageIndexRef.current;
-    if (index === null) return;
-    setMessages((prev) => {
+    if (index === null || !mode) return;
+    updateMessagesForMode(mode, (prev) => {
       if (index < 0 || index >= prev.length) return prev;
       const updated = [...prev];
       updated[index] = updater(updated[index]);
@@ -282,26 +420,26 @@ export default function AISidebar({
 
   const appendToStreamingMessage = (text: string) => {
     if (!text) return;
-    
+
     // Accumulate content for JSON detection
     streamedContentRef.current += text;
     const accumulated = streamedContentRef.current.trim();
-    
+
     // Check if this looks like JSON (starts with { or ```json)
-    const looksLikeJSON = accumulated.startsWith("{") || 
-                          accumulated.startsWith("```json") ||
-                          accumulated.startsWith("```");
-    
+    const looksLikeJSON = accumulated.startsWith("{") ||
+      accumulated.startsWith("```json") ||
+      accumulated.startsWith("```");
+
     if (looksLikeJSON) {
       // Mark as JSON streaming
       isStreamingJSONRef.current = true;
-      
+
       // Always update the message content so we can parse it in the render
       // The AnalysisCard will handle the rendering when valid JSON is detected
       setStreamingMessageContent(accumulated);
       return;
     }
-    
+
     // Not JSON, show normally
     updateStreamingMessage((msg) => ({
       ...msg,
@@ -320,6 +458,7 @@ export default function AISidebar({
 
   const clearStreamingMessage = () => {
     streamingMessageIndexRef.current = null;
+    streamingModeRef.current = null;
     isStreamingJSONRef.current = false;
     streamedContentRef.current = "";
   };
@@ -327,7 +466,10 @@ export default function AISidebar({
   const remainingExamples = exampleQuestions.filter(
     (q) => !askedQuestions.includes(q)
   );
-  const showExamples = remainingExamples.length > 0 && inputMessage.length === 0;
+  const showExamples =
+    interactionMode === "chat" &&
+    remainingExamples.length > 0 &&
+    inputMessage.length === 0;
 
   const handleStream = async (body: ReadableStream<Uint8Array> | null) => {
     if (!body) {
@@ -366,9 +508,9 @@ export default function AISidebar({
             const chunk = Array.isArray(delta)
               ? delta.join("")
               : delta ||
-                (Array.isArray(messageContent)
-                  ? messageContent.join("")
-                  : messageContent);
+              (Array.isArray(messageContent)
+                ? messageContent.join("")
+                : messageContent);
 
             if (chunk) {
               appendToStreamingMessage(chunk);
@@ -386,18 +528,37 @@ export default function AISidebar({
     }
   };
 
-  const streamModelResponse = async (question: string) => {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        question,
-        contextData,
-        pageType,
-      }),
-    });
+  const streamModelResponse = async (question: string, files: File[]) => {
+    let response: Response;
+
+    if (files.length > 0) {
+      const formData = new FormData();
+      formData.append("question", question);
+      formData.append("contextData", contextData);
+      formData.append("pageType", pageType);
+      formData.append("model", selectedAskModel);
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      response = await fetch(API_URL, {
+        method: "POST",
+        body: formData,
+      });
+    } else {
+      response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question,
+          contextData,
+          pageType,
+          model: selectedAskModel,
+        }),
+      });
+    }
 
     if (!response.ok) {
       const errorData = await response.text();
@@ -432,28 +593,152 @@ export default function AISidebar({
     appendToStreamingMessage(aiResponse);
   };
 
+  const requestImageGeneration = async (prompt: string, files: File[]) => {
+    const cleanedPrompt = prompt
+      .replace(/^\/(image|img)\s+/i, "")
+      .trim();
+    let response: Response;
+    const referenceImage = files.find((file) =>
+      (file.type || "").toLowerCase().startsWith("image/")
+    );
+
+    if (referenceImage) {
+      const formData = new FormData();
+      formData.append("prompt", cleanedPrompt);
+      formData.append("model", selectedImageModel);
+      formData.append("referenceImage", referenceImage);
+
+      response = await fetch(IMAGE_API_URL, {
+        method: "POST",
+        body: formData,
+      });
+    } else {
+      response = await fetch(IMAGE_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: cleanedPrompt,
+          model: selectedImageModel,
+        }),
+      });
+    }
+
+    if (!response.ok) {
+      const raw = await response.text();
+      try {
+        const parsed = JSON.parse(raw);
+        const message =
+          typeof parsed?.error === "string"
+            ? parsed.error
+            : typeof parsed?.details === "string"
+              ? parsed.details
+              : raw;
+        throw new Error(message || `Image API error: ${response.status}`);
+      } catch {
+        throw new Error(raw || `Image API error: ${response.status}`);
+      }
+    }
+
+    const data = await response.json();
+    if (!data?.imageDataUrl) {
+      throw new Error("Image API returned no image data.");
+    }
+
+    return {
+      imageDataUrl: data.imageDataUrl as string,
+      mimeType: (data.mimeType as string) || "image/png",
+      modelUsed: (data.modelUsed as string) || selectedImageModel,
+    };
+  };
+
   const processQuestion = async (question: string, fromExample = false) => {
     const trimmedQuestion = question.trim();
-    if (!trimmedQuestion) return;
+    const effectiveQuestion =
+      trimmedQuestion ||
+      (attachedFiles.length > 0
+        ? interactionMode === "image"
+          ? "Create a high quality ESG-themed variation of the attached image."
+          : "Please summarize the attached file(s)."
+        : "");
+    if (!effectiveQuestion) return;
 
     const userMessage: Message = {
       role: "user",
-      content: trimmedQuestion,
+      content: effectiveQuestion,
       timestamp: new Date(),
+      attachments: attachedFiles.length
+        ? attachedFiles.map((file) => ({
+          name: file.name,
+          size: file.size,
+          kind: file.kind,
+          previewDataUrl: file.previewDataUrl,
+        }))
+        : undefined,
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    const activeMode = interactionMode;
+    updateMessagesForMode(activeMode, (prev) => [...prev, userMessage]);
     if (fromExample) {
-      setAskedQuestions((prev) => [...prev, trimmedQuestion]);
+      setAskedQuestions((prev) => [...prev, effectiveQuestion]);
     } else {
       setInputMessage("");
+      resetTextareaHeight();
     }
 
-    startAssistantMessage();
+    const filesForRequest = attachedFiles.map((item) => item.file);
+    const shouldGenerateImage = interactionMode === "image";
+    // Clear picker chips immediately after send so attachments don't linger in composer.
+    setAttachedFiles([]);
+    setUploadError(null);
+
+    if (shouldGenerateImage) {
+      setLoadingLabel("Generating image");
+      setIsLoading(true);
+
+      try {
+        const generated = await requestImageGeneration(
+          effectiveQuestion,
+          filesForRequest
+        );
+        updateMessagesForMode(activeMode, (prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: `Generated with ${generated.modelUsed}`,
+            generatedImageDataUrl: generated.imageDataUrl,
+            generatedImageMimeType: generated.mimeType,
+            generatedImageModel: generated.modelUsed,
+            timestamp: new Date(),
+          },
+        ]);
+      } catch (error) {
+        console.error("Error while generating image", error);
+        updateMessagesForMode(activeMode, (prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content:
+              error instanceof Error && error.message
+                ? error.message
+                : "⚠️ Error: Unable to generate an image right now. Please try a different prompt or model.",
+            timestamp: new Date(),
+          },
+        ]);
+      } finally {
+        setIsLoading(false);
+        setLoadingLabel("Analysing");
+      }
+      return;
+    }
+
+    startAssistantMessage(activeMode);
+    setLoadingLabel("Analysing");
     setIsLoading(true);
 
     try {
-      await streamModelResponse(trimmedQuestion);
+      await streamModelResponse(effectiveQuestion, filesForRequest);
       setIsLoading(false);
       clearStreamingMessage();
     } catch (error) {
@@ -469,6 +754,86 @@ export default function AISidebar({
     }
   };
 
+  const handleAttachmentClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const addFilesToComposer = async (selected: File[]) => {
+    if (selected.length === 0) return;
+
+    setUploadError(null);
+    const nextFiles = [...attachedFiles];
+
+    for (const file of selected) {
+      if (nextFiles.length >= MAX_FILES) {
+        setUploadError(`You can attach up to ${MAX_FILES} files.`);
+        break;
+      }
+
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        setUploadError(`${file.name || "File"} is too large. Max size is 10 MB.`);
+        continue;
+      }
+
+      if (!isSupportedUpload(file)) {
+        setUploadError(`${file.name || "This file"} is not a supported file type.`);
+        continue;
+      }
+
+      const kind = file.type.startsWith("image/") ? "image" : "document";
+      let previewDataUrl: string | undefined;
+
+      if (kind === "image") {
+        try {
+          previewDataUrl = await readFileAsDataUrl(file);
+        } catch {
+          previewDataUrl = undefined;
+        }
+      }
+
+      const fallbackName =
+        kind === "image"
+          ? `pasted-image-${Date.now()}-${nextFiles.length + 1}.png`
+          : `document-${Date.now()}-${nextFiles.length + 1}`;
+
+      nextFiles.push({
+        file,
+        name: file.name || fallbackName,
+        size: file.size,
+        kind,
+        previewDataUrl,
+      });
+    }
+
+    setAttachedFiles(nextFiles);
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(event.target.files || []);
+    await addFilesToComposer(selected);
+    event.target.value = "";
+  };
+
+  const handleTextareaPaste = async (
+    event: React.ClipboardEvent<HTMLTextAreaElement>
+  ) => {
+    const items = Array.from(event.clipboardData?.items || []);
+    const pastedImages = items
+      .map((item) => (item.kind === "file" ? item.getAsFile() : null))
+      .filter((file): file is File => Boolean(file && file.type.startsWith("image/")));
+
+    if (pastedImages.length === 0) {
+      return;
+    }
+
+    event.preventDefault();
+    await addFilesToComposer(pastedImages);
+  };
+
+  const removeAttachedFile = (index: number) => {
+    setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleExampleClick = async (question: string) => {
     await processQuestion(question, true);
   };
@@ -477,16 +842,58 @@ export default function AISidebar({
     setIsMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (!textareaRef.current) return;
+    resizeTextarea(textareaRef.current);
+  }, [inputMessage]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [activeMessages, interactionMode]);
 
   const sendMessage = async () => {
     await processQuestion(inputMessage, false);
+  };
+
+  const handleGeneratePPT = async () => {
+    if (isGeneratingPPT) return;
+    setIsGeneratingPPT(true);
+    try {
+      const response = await fetch("/api/generate-ppt", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contextData,
+          pageType,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Request failed: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "esg-presentation.pptx";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("PPT generation error:", error);
+      alert("Failed to generate PPT. Please try again.");
+    } finally {
+      setIsGeneratingPPT(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -498,9 +905,8 @@ export default function AISidebar({
 
   return (
     <div
-      className={`bg-white border-l border-gray-200 flex flex-col h-full transition-all duration-300 ease-in-out ${
-        isOpen ? "w-[400px] opacity-100" : "w-0 opacity-0 overflow-hidden"
-      }`}
+      className={`bg-white border-l border-gray-200 flex flex-col h-full transition-all duration-300 ease-in-out ${isOpen ? "w-[400px] opacity-100" : "w-0 opacity-0 overflow-hidden"
+        }`}
     >
       {/* Header */}
       <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-emerald-600 to-emerald-700">
@@ -521,40 +927,84 @@ export default function AISidebar({
         </button>
       </div>
 
+      <div className="border-b border-gray-200 bg-white px-3 py-2">
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => setInteractionMode("chat")}
+            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${interactionMode === "chat"
+              ? "bg-emerald-600 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+          >
+            Ask AI
+          </button>
+          <button
+            type="button"
+            onClick={() => setInteractionMode("image")}
+            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${interactionMode === "image"
+              ? "bg-emerald-600 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+          >
+            Generate Image
+          </button>
+        </div>
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <span className="text-[11px] font-medium text-gray-500">Model</span>
+          <select
+            value={interactionMode === "image" ? selectedImageModel : selectedAskModel}
+            onChange={(event) => {
+              if (interactionMode === "image") {
+                setSelectedImageModel(event.target.value);
+              } else {
+                setSelectedAskModel(event.target.value);
+              }
+            }}
+            disabled={isLoading}
+            className="max-w-[220px] rounded-lg border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
+          >
+            {(interactionMode === "image" ? IMAGE_GENERATION_MODELS : ASK_AI_MODELS).map((model) => (
+              <option key={model} value={model}>
+                {model}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {/* Messages */}
       <div
         className="flex-1 overflow-y-auto p-4 bg-gray-50 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400"
         style={{ maxHeight: "calc(100vh - 140px)" }}
       >
         <div
-          className={`min-h-full flex flex-col ${
-            showExamples ? "justify-end" : "justify-start"
-          } space-y-4`}
+          className="min-h-full flex flex-col justify-start space-y-4"
         >
-          {messages.map((message, index) => (
+          {activeMessages.map((message, index) => (
             <div
               key={index}
-              className={`flex ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
+              className={`flex ${message.role === "user" ? "justify-end" : "justify-start"
+                }`}
             >
               <div
-                className={`max-w-[95%] rounded-2xl px-4 py-3 ${
-                  message.role === "user"
-                    ? "bg-emerald-600 text-white"
-                    : "bg-white border border-gray-200 text-gray-800 shadow-sm"
-                }`}
+                className={`max-w-[95%] rounded-2xl px-4 py-3 ${message.role === "user"
+                  ? "bg-emerald-600 text-white"
+                  : "bg-white border border-gray-200 text-gray-800 shadow-sm"
+                  }`}
               >
                 {message.role === "assistant" ? (
                   (() => {
-                    const isStreamingMessage = index === streamingMessageIndexRef.current;
+                    const isStreamingMessage =
+                      streamingModeRef.current === interactionMode &&
+                      index === streamingMessageIndexRef.current;
                     const analysisData = parseAnalysisData(message.content);
-                    
+
                     // Check if content looks like it might be JSON (starts with { or ```json)
-                    const looksLikeJSON = message.content.trim().startsWith("{") || 
-                                          message.content.trim().startsWith("```json") ||
-                                          message.content.trim().startsWith("```");
-                    
+                    const looksLikeJSON = message.content.trim().startsWith("{") ||
+                      message.content.trim().startsWith("```json") ||
+                      message.content.trim().startsWith("```");
+
                     if (analysisData) {
                       // Valid JSON - render the analysis card
                       return <AnalysisCard data={analysisData} isStreaming={isStreamingMessage && isLoading} />;
@@ -562,7 +1012,38 @@ export default function AISidebar({
                       // Looks like JSON but not valid yet (still streaming) - show skeleton card
                       return <AnalysisCard data={{ format: "analysis", positives: [], negatives: [], summary: "" }} isStreaming={true} />;
                     }
-                    
+
+                    if (message.generatedImageDataUrl) {
+                      return (
+                        <div className="space-y-3">
+                          <Image
+                            src={message.generatedImageDataUrl}
+                            alt="AI generated"
+                            width={1024}
+                            height={1024}
+                            unoptimized
+                            className="h-auto w-full max-h-[360px] rounded-xl border border-gray-200 object-contain bg-white"
+                          />
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-xs text-gray-500 truncate">
+                              {message.generatedImageModel || "Generated image"}
+                            </p>
+                            <a
+                              href={message.generatedImageDataUrl}
+                              download={`generated-${Date.now()}.${(message.generatedImageMimeType || "image/png").includes("jpeg") ? "jpg" : "png"}`}
+                              className="inline-flex items-center gap-1 rounded-full border border-emerald-200 px-2.5 py-1 text-xs text-emerald-700 hover:bg-emerald-50"
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                              Download
+                            </a>
+                          </div>
+                          {message.content ? (
+                            <p className="text-xs text-gray-600">{message.content}</p>
+                          ) : null}
+                        </div>
+                      );
+                    }
+
                     // Not JSON - render markdown normally
                     return (
                       <div className="text-sm prose prose-sm max-w-none prose-headings:text-gray-800 prose-p:text-gray-700 prose-strong:text-gray-900 break-words">
@@ -584,17 +1065,39 @@ export default function AISidebar({
                     );
                   })()
                 ) : (
-                  <p className="text-sm whitespace-pre-wrap">
-                    {message.content}
-                  </p>
+                  <div className="space-y-2">
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    {message.attachments && message.attachments.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {message.attachments.map((file, attachmentIndex) => (
+                          <span
+                            key={`${file.name}-${attachmentIndex}`}
+                            className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-1 text-[11px] text-white"
+                          >
+                            {file.kind === "image" && file.previewDataUrl ? (
+                              <span
+                                className="h-4 w-4 rounded bg-white/30 bg-cover bg-center"
+                                style={{ backgroundImage: `url(${file.previewDataUrl})` }}
+                              />
+                            ) : file.kind === "image" ? (
+                              <ImageIcon className="h-3 w-3" />
+                            ) : (
+                              <FileText className="h-3 w-3" />
+                            )}
+                            <span className="max-w-[170px] truncate">{file.name}</span>
+                            <span className="text-white/85">({formatBytes(file.size)})</span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
                 {isMounted && (
                   <span
-                    className={`text-xs mt-2 block ${
-                      message.role === "user"
-                        ? "text-emerald-100"
-                        : "text-gray-400"
-                    }`}
+                    className={`text-xs mt-2 block ${message.role === "user"
+                      ? "text-emerald-100"
+                      : "text-gray-400"
+                      }`}
                   >
                     {message.timestamp.toLocaleTimeString([], {
                       hour: "2-digit",
@@ -640,7 +1143,7 @@ export default function AISidebar({
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-medium text-emerald-700">
-                      Analysing
+                      {loadingLabel}
                     </span>
                   </div>
                 </div>
@@ -651,9 +1154,9 @@ export default function AISidebar({
         </div>
       </div>
 
-      {/* Example Questions */}
+      {/* Example Questions & PPT Button */}
       {showExamples && (
-        <div className="px-4 pb-3 bg-gray-50">
+        <div className="px-4 pb-3 bg-gray-50 space-y-3">
           <p className="text-xs text-gray-500 mb-2 font-medium">Try asking:</p>
           <div className="flex flex-wrap gap-2">
             {remainingExamples.map((question, index) => (
@@ -666,28 +1169,96 @@ export default function AISidebar({
               </button>
             ))}
           </div>
+          <button
+            onClick={handleGeneratePPT}
+            disabled={isGeneratingPPT}
+            className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <Download className="h-4 w-4" />
+            {isGeneratingPPT ? "Generating PPT..." : "Generate PPT"}
+          </button>
         </div>
       )}
 
       {/* Input */}
       <div className="p-3 border-t border-gray-200 bg-white shrink-0">
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          multiple
+          accept=".txt,.md,.csv,.json,.log,.pdf,.png,.jpg,.jpeg,.webp,.gif,text/plain,text/markdown,text/csv,application/json,application/pdf,image/*"
+          onChange={handleFileChange}
+        />
+        {attachedFiles.length > 0 && (
+          <div className="mb-2 flex flex-wrap gap-2">
+            {attachedFiles.map((file, index) => {
+              return (
+                <div
+                  key={`${file.name}-${index}`}
+                  className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs text-emerald-800"
+                >
+                  {file.kind === "image" && file.previewDataUrl ? (
+                    <span
+                      className="h-4 w-4 rounded bg-emerald-200 bg-cover bg-center"
+                      style={{ backgroundImage: `url(${file.previewDataUrl})` }}
+                    />
+                  ) : file.kind === "image" ? (
+                    <ImageIcon className="h-3.5 w-3.5" />
+                  ) : (
+                    <FileText className="h-3.5 w-3.5" />
+                  )}
+                  <span className="max-w-[160px] truncate">{file.name}</span>
+                  <span className="text-emerald-600">({formatBytes(file.size)})</span>
+                  <button
+                    type="button"
+                    onClick={() => removeAttachedFile(index)}
+                    className="ml-1 text-emerald-700 hover:text-emerald-900"
+                    aria-label={`Remove ${file.name}`}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {uploadError && (
+          <p className="mb-2 text-xs text-red-600">{uploadError}</p>
+        )}
         <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={handleAttachmentClick}
+            disabled={isLoading || attachedFiles.length >= MAX_FILES}
+            className="h-11 self-end bg-gray-100 text-gray-700 p-3 rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Attach files"
+          >
+            <Paperclip className="w-5 h-5" />
+          </button>
           <textarea
+            ref={textareaRef}
             value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
+            onChange={(e) => {
+              setInputMessage(e.target.value);
+              resizeTextarea(e.target);
+            }}
+            onPaste={handleTextareaPaste}
             onKeyPress={handleKeyPress}
             placeholder={
-              pageType === "dashboard"
-                ? "Ask about your ESG data..."
-                : "Ask about GHG report data..."
+              interactionMode === "image"
+                ? "Describe the image you want to generate..."
+                : pageType === "dashboard"
+                  ? "Ask about your ESG data or attach files..."
+                  : "Ask about GHG report data or attach files..."
             }
-            className="flex-1 resize-none border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent min-h-[44px] max-h-[120px]"
+            className="flex-1 resize-none overflow-y-hidden border border-gray-300 rounded-xl px-3 py-2.5 text-sm leading-6 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent min-h-[44px]"
             rows={1}
           />
           <button
             onClick={sendMessage}
-            disabled={isLoading || !inputMessage.trim()}
-            className="bg-emerald-600 text-white p-3 rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isLoading || (!inputMessage.trim() && attachedFiles.length === 0)}
+            className="h-11 self-end bg-emerald-600 text-white p-3 rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-5 h-5" />
           </button>

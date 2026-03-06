@@ -1,10 +1,16 @@
-node_modules
-.next
-.turbo
-dist
-build
-.vercel
-coverage
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+.turbo/
+dist/
+build/
+.vercel/
+coverage/
+next-env.d.ts
+
+# Environment variables (NEVER commit secrets)
 .env
 .env.local
 .env.development
@@ -12,18 +18,52 @@ coverage
 .env.test
 .env.*.local
 .env*.local
+env.txt
+
+# Logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Lock files (optional: remove if your team needs them)
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
+
+# TypeScript
 *.tsbuildinfo
+
+# OS files
 .DS_Store
 Thumbs.db
 *.swp
 *.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.ruff_cache/
+.venv/
+venv/
+*.egg-info/
+
+# Generated / output files
+*.pptx
+*.pdf
+*.xlsx
+
+# Dev scratch / notes
 Scope 1,2,3.txt
+layouts.txt
+layouts_utf8.txt
+template_layouts.txt
+plan.json
+opencode.json
+env.txt
+
+# Dev utility scripts (not part of app)
+_test_cairo.py
 

@@ -127,11 +127,11 @@ const YEAR_DATASETS = {
       total_emissions: 87725.26,
       scope_1: { value: 35533.1, status: "Data available" },
       scope_2: { value: 6352.18, status: "Data available" },
-      scope_3: { value: 45839.98, status: "Data available" },
+      scope_3: { value: 45839.982416, status: "Data available" },
       breakdown: {
-        scope_1_percentage: 40.5,
+        scope_1_percentage: 40.50,
         scope_2_percentage: 7.24,
-        scope_3_percentage: 52.25,
+        scope_3_percentage: 52.26,
       },
       top_emitters: [
         "Scope 3 - Purchased Goods (52.25%)",
@@ -168,15 +168,19 @@ const YEAR_DATASETS = {
       { month: "Mar", renewable: 0, imported: 0, electricity: 0 },
     ],
     scope3Data: [
-      { name: "Purchased Goods", value: 45280.74, color: "#6366f1" },
-      { name: "Waste Disposal", value: 4.58, color: "#f59e0b" },
-      {
-        name: "Transmission & Distribution Loss",
-        value: 183.36,
-        color: "#10b981",
-      },
-      { name: "Downstream Activities", value: 206.28, color: "#ef4444" },
-      { name: "Water Treatment", value: 165.02, color: "#84cc16" },
+      { name: "Purchased Goods", value: 44952.301031, color: "#6366f1" },
+      { name: "Downstream Activities", value: 206.723297, color: "#ef4444" },
+      { name: "T&D Loss", value: 181.32087, color: "#10b981" },
+      { name: "Water Treatment", value: 165.871319, color: "#84cc16" },
+      { name: "Upstream Activities", value: 107.237389, color: "#8b5cf6" },
+      { name: "Water Supply", value: 93.849879, color: "#06b6d4" },
+      { name: "Air Travel", value: 85.780954, color: "#f97316" },
+      { name: "Hotel Stay", value: 20.4363, color: "#ec4899" },
+      { name: "Sea Travel", value: 11.8335, color: "#14b8a6" },
+      { name: "Food Consumption", value: 5.07625, color: "#78716c" },
+      { name: "Waste Disposal", value: 4.606446, color: "#f59e0b" },
+      { name: "Employee Commute", value: 3.713639, color: "#64748b" },
+      { name: "Land Travel", value: 1.231542, color: "#a3a3a3" },
     ],
   },
 } satisfies Record<string, YearDataset>;
@@ -496,21 +500,15 @@ export default function ESGDashboard() {
                 <div className="mt-4 flex items-center justify-center gap-6 text-sm">
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
-                    <span className="text-gray-600">
-                      Stationary Combustion (FY 2024-25)
-                    </span>
+                    <span className="text-gray-600">Stationary Combustion</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-pink-500"></span>
-                    <span className="text-gray-600">
-                      Mobile Combustion (FY 2024-25)
-                    </span>
+                    <span className="text-gray-600">Mobile Combustion</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-                    <span className="text-gray-600">
-                      Fugitive Emissions (FY 2024-25)
-                    </span>
+                    <span className="text-gray-600">Fugitive Emissions</span>
                   </div>
                 </div>
               </div>
@@ -581,21 +579,15 @@ export default function ESGDashboard() {
                 <div className="mt-4 flex items-center justify-center gap-6 text-sm">
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
-                    <span className="text-gray-600">
-                      Renewable Electricity Generation (FY 2024-25)
-                    </span>
+                    <span className="text-gray-600">Renewable Electricity Generation</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-pink-500"></span>
-                    <span className="text-gray-600">
-                      Imported Energy (FY 2024-25)
-                    </span>
+                    <span className="text-gray-600">Imported Energy</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-                    <span className="text-gray-600">
-                      Imported Electricity (FY 2024-25)
-                    </span>
+                    <span className="text-gray-600">Imported Electricity</span>
                   </div>
                 </div>
               </div>

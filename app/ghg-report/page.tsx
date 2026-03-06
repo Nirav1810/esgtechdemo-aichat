@@ -464,7 +464,7 @@ const buildGHGContext = () => {
       totalEmissions: 87725.262736,
       scope1: { total: 35533.102619, categories: ["Stationary Combustion", "Mobile Combustion", "Fugitive Emissions"] },
       scope2: { total: 6352.177702, categories: ["Purchased Electricity", "Purchased Heat and Steam", "Renewable Electricity Generation"] },
-      scope3: { total: 46350.18387, categories: ["Employee Commute", "Food Consumption", "Purchased Goods", "Transmission & Distribution Loss", "Upstream Activities", "Downstream Activities", "Waste Disposal", "Water Supply", "Water Treatment", "Business Travel (Air)", "Business Travel (Sea)", "Business Travel (Land)", "Hotel Stay"] },
+      scope3: { total: 45839.982416, categories: ["Employee Commute", "Food Consumption", "Purchased Goods", "Transmission & Distribution Loss", "Upstream Activities", "Downstream Activities", "Waste Disposal", "Water Supply", "Water Treatment", "Business Travel (Air)", "Business Travel (Sea)", "Business Travel (Land)", "Hotel Stay"] },
     },
     detailedData: {
       stationaryCombustion: {
@@ -611,7 +611,7 @@ export default function GHGReportPage() {
   const totalEmissions = 87725.262736;
   const scope1Value = 35533.102621; // 29746.194006 + 1.890615 + 5785.018
   const scope2Value = 6352.177702; // 6351.960378 + 0.217324 + 0
-  const scope3Value = 46350.18387; // Previous + 107.237389 + 206.723297 + 4.606446 + 93.849879 + 165.871319 + 85.780954 + 11.8335 + 1.231542 + 20.4363
+  const scope3Value = 45839.982416; // sum of all 13 Scope 3 categories
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
