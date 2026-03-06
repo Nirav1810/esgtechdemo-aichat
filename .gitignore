@@ -67,3 +67,5 @@ env.txt
 # Dev utility scripts (not part of app)
 _test_cairo.py
 
+#personal
+opencode.json
