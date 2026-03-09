@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useEffect, useId } from "react";
 import Image from "next/image";
-import { MessageCircle, X, Send, Leaf, AlertTriangle, Download, Paperclip, FileText, Image as ImageIcon } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { MessageCircle, X, Send, Leaf, AlertTriangle, Download, Paperclip, FileText, Image as ImageIcon, Clock, Plus, Trash2, LogOut, History } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -26,11 +27,12 @@ const IMAGE_GENERATION_MODELS = [
   "Qwen-Image-2512",
 ];
 const ASK_AI_MODELS = [
-  "Qwen/Qwen3-32B",
+
   "Qwen/Qwen3-235B-A22B-Instruct-2507-TEE",
   "deepseek-ai/DeepSeek-V3.2-TEE",
   "NousResearch/Hermes-4-405B-FP8-TEE",
   "zai-org/GLM-4.7-TEE",
+  "Qwen/Qwen3-32B",
 ];
 const TEXTAREA_MIN_HEIGHT = 44;
 const TEXTAREA_MAX_HEIGHT = 120;
@@ -73,7 +75,7 @@ const readFileAsDataUrl = (file: File): Promise<string> =>
 interface Message {
   role: "user" | "assistant";
   content: string;
-  timestamp: Date;
+  timestamp: Date | string;
   generatedImageDataUrl?: string;
   generatedImageMimeType?: string;
   generatedImageModel?: string;
@@ -83,6 +85,16 @@ interface Message {
     kind: "image" | "document";
     previewDataUrl?: string;
   }[];
+}
+
+interface Chat {
+  _id: string;
+  userId: string;
+  pageType: "dashboard" | "ghg-report";
+  title: string;
+  messages: Message[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface ComposerAttachment {
@@ -121,9 +133,8 @@ const cleanLatex = (content: string): string => {
     .replace(/\\!/g, "")
     .replace(/_\{([^}]+)\}/g, "$1")
     .replace(/\^\{([^}]+)\}/g, "$1")
-    .replace(/[ \t]+/g, " ")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+    .replace(/>\s+</g, "><")  // Only collapse spaces between tags
+    .replace(/\n{3,}/g, "\n\n");
 };
 
 // Dashboard example questions
@@ -353,6 +364,189 @@ export default function AISidebar({
   const isStreamingJSONRef = useRef<boolean>(false);
   const streamedContentRef = useRef<string>("");
 
+  const chatMessagesRef = useRef<Message[]>(chatMessages);
+  const imageMessagesRef = useRef<Message[]>(imageMessages);
+
+  useEffect(() => {
+    chatMessagesRef.current = chatMessages;
+  }, [chatMessages]);
+
+  useEffect(() => {
+    imageMessagesRef.current = imageMessages;
+  }, [imageMessages]);
+
+  // Session and Chat History
+  const { data: session, status } = useSession();
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const [isLoadingChats, setIsLoadingChats] = useState(false);
+  const [showChatList, setShowChatList] = useState(false);
+
+  // Load chats when session is available and sidebar opens
+  useEffect(() => {
+    if (session?.user && isOpen) {
+      loadChats();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, isOpen, pageType]);
+
+  const loadChats = async () => {
+    if (!session?.user) return;
+    setIsLoadingChats(true);
+    try {
+      const res = await fetch(`/api/chats?pageType=${pageType}`);
+      const data = await res.json();
+      if (data.chats) {
+        setChats(data.chats);
+      }
+    } catch (error) {
+      console.error("Error loading chats:", error);
+    } finally {
+      setIsLoadingChats(false);
+    }
+  };
+
+  const createNewChat = async () => {
+    // Just clear messages and reset currentChatId - don't create empty chat in DB
+    // A new chat will be created when the user sends their first message
+    setCurrentChatId(null);
+    setChatMessages(getInitialMessages());
+    setShowChatList(false);
+  };
+
+  const createNewChatWithMessages = async (chatPageType: string, messages: Message[]) => {
+    if (!session?.user) {
+      console.log("No session user, cannot create chat");
+      return;
+    }
+    try {
+      // Get title from first user message
+      const firstUserMessage = messages.find(m => m.role === 'user');
+      const title = firstUserMessage
+        ? firstUserMessage.content.slice(0, 50) + (firstUserMessage.content.length > 50 ? '...' : '')
+        : 'New Chat';
+
+      // Serialize messages - convert Date to string
+      const serializedMessages = messages.map(msg => ({
+        ...msg,
+        timestamp: msg.timestamp instanceof Date ? msg.timestamp.toISOString() : msg.timestamp,
+      }));
+
+      console.log("Creating chat with:", { pageType: chatPageType, title, messagesCount: messages.length, firstMsg: messages[0]?.content?.slice(0, 30) });
+
+      const res = await fetch('/api/chats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pageType: chatPageType,
+          title,
+          messages: serializedMessages,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.text();
+        console.error("Failed to create chat:", res.status, errorData);
+        return;
+      }
+
+      const data = await res.json();
+      console.log("Created chat response:", data);
+      if (data.chat) {
+        setChats(prevChats => [data.chat, ...prevChats]);
+        setCurrentChatId(data.chat._id);
+      }
+    } catch (error) {
+      console.error("Error creating chat with messages:", error);
+    }
+  };
+
+  const selectChat = async (chatId: string) => {
+    if (!session?.user) return;
+    try {
+      const res = await fetch(`/api/chats/${chatId}`);
+      const data = await res.json();
+      if (data.chat) {
+        const loadedMessages = data.chat.messages.map((msg: Message) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        }));
+        setChatMessages(loadedMessages);
+        setCurrentChatId(chatId);
+        setShowChatList(false);
+      }
+    } catch (error) {
+      console.error("Error loading chat:", error);
+    }
+  };
+
+  const saveChat = async (messages: Message[]) => {
+    if (!session?.user || !currentChatId) return;
+    try {
+      // Get first user message as title, or use default
+      const firstUserMessage = messages.find(m => m.role === 'user');
+      const title = firstUserMessage
+        ? firstUserMessage.content.slice(0, 50) + (firstUserMessage.content.length > 50 ? '...' : '')
+        : 'New Chat';
+
+      // Serialize messages - convert Date to string
+      const serializedMessages = messages.map(msg => ({
+        ...msg,
+        timestamp: msg.timestamp instanceof Date ? msg.timestamp.toISOString() : msg.timestamp,
+      }));
+
+      const res = await fetch(`/api/chats/${currentChatId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: serializedMessages,
+          title,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.text();
+        console.error("Failed to save chat:", res.status, errorData);
+        return;
+      }
+
+      // Update chat in local list
+      setChats(prevChats => prevChats.map(chat =>
+        chat._id === currentChatId
+          ? { ...chat, title, messages, updatedAt: new Date().toISOString() }
+          : chat
+      ));
+    } catch (error) {
+      console.error("Error saving chat:", error);
+    }
+  };
+
+  const deleteChat = async (chatId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!session?.user) return;
+    try {
+      await fetch(`/api/chats/${chatId}`, { method: 'DELETE' });
+      setChats(chats.filter(chat => chat._id !== chatId));
+      if (currentChatId === chatId) {
+        setCurrentChatId(null);
+        setChatMessages(getInitialMessages());
+      }
+    } catch (error) {
+      console.error("Error deleting chat:", error);
+    }
+  };
+
+  const getInitialMessages = () => [
+    {
+      role: "assistant" as const,
+      content:
+        pageType === "dashboard"
+          ? "Hello! I'm your ESG AI Assistant. Ask me anything about your GHG emissions data, sustainability metrics, or how to improve your environmental impact."
+          : "Hello! I'm your GHG Report AI Assistant. I can help you summarize emissions data, explain specific emission categories, compare scopes, or analyze any field in this report. What would you like to know?",
+      timestamp: new Date(),
+    },
+  ];
+
   const resizeTextarea = (element: HTMLTextAreaElement) => {
     if (!element.value.trim()) {
       element.style.height = `${TEXTAREA_MIN_HEIGHT}px`;
@@ -423,7 +617,7 @@ export default function AISidebar({
 
     // Accumulate content for JSON detection
     streamedContentRef.current += text;
-    const accumulated = streamedContentRef.current.trim();
+    const accumulated = streamedContentRef.current;
 
     // Check if this looks like JSON (starts with { or ```json)
     const looksLikeJSON = accumulated.startsWith("{") ||
@@ -528,8 +722,14 @@ export default function AISidebar({
     }
   };
 
-  const streamModelResponse = async (question: string, files: File[]) => {
+  const streamModelResponse = async (question: string, files: File[], history: Message[] = []) => {
     let response: Response;
+
+    // Convert messages to simple format for API
+    const historyForApi = history.map(msg => ({
+      role: msg.role,
+      content: msg.content,
+    }));
 
     if (files.length > 0) {
       const formData = new FormData();
@@ -537,6 +737,7 @@ export default function AISidebar({
       formData.append("contextData", contextData);
       formData.append("pageType", pageType);
       formData.append("model", selectedAskModel);
+      formData.append("history", JSON.stringify(historyForApi));
       files.forEach((file) => {
         formData.append("files", file);
       });
@@ -556,6 +757,7 @@ export default function AISidebar({
           contextData,
           pageType,
           model: selectedAskModel,
+          history: historyForApi,
         }),
       });
     }
@@ -737,10 +939,45 @@ export default function AISidebar({
     setLoadingLabel("Analysing");
     setIsLoading(true);
 
+    // Get current messages for conversation history
+    const currentMessages = activeMode === "chat" ? chatMessages : imageMessages;
+
     try {
-      await streamModelResponse(effectiveQuestion, filesForRequest);
+      await streamModelResponse(effectiveQuestion, filesForRequest, currentMessages);
       setIsLoading(false);
       clearStreamingMessage();
+
+      // Small delay to ensure state is updated
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Save chat to database if logged in
+      if (session?.user) {
+        // Get updated messages after the response (includes assistant's response)
+        const updatedMessages = activeMode === "chat"
+          ? [...chatMessagesRef.current]
+          : [...imageMessagesRef.current];
+
+        console.log("Saving messages:", updatedMessages.length);
+
+        // Filter out empty assistant messages
+        const validMessages = updatedMessages.filter(m =>
+          m.role === 'user' || (m.role === 'assistant' && m.content && m.content.trim().length > 0)
+        );
+
+        console.log("Save decision:", { currentChatId, validMessagesLength: validMessages.length, pageType, updatedMessagesCount: updatedMessages.length });
+
+        if (currentChatId) {
+          // Save to existing chat
+          console.log("Saving to existing chat:", currentChatId);
+          await saveChat(updatedMessages);
+        } else if (validMessages.length > 0) {
+          // Create new chat with messages
+          console.log("Creating new chat, pageType:", pageType, "messages:", validMessages.map(m => `${m.role}: ${m.content?.slice(0, 20)}`));
+          await createNewChatWithMessages(pageType, validMessages);
+        } else {
+          console.log("No valid messages to save, skipping...");
+        }
+      }
     } catch (error) {
       console.error("Error while contacting AI backend", error);
       setStreamingMessageContent(
@@ -919,13 +1156,71 @@ export default function AISidebar({
             <p className="text-xs text-emerald-100">{subtitle}</p>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          className="text-white/80 hover:text-white transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-1">
+          {session?.user && (
+            <button
+              onClick={() => setShowChatList(!showChatList)}
+              className="text-white/80 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10"
+              title="Chat History"
+            >
+              <History className="w-5 h-5" />
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="text-white/80 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
       </div>
+
+      {/* Chat History Panel */}
+      {showChatList && session?.user && (
+        <div className="border-b border-gray-200 bg-gray-50 p-3 max-h-[300px] overflow-y-auto">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-sm font-medium text-gray-700">Chat History</h4>
+            <button
+              onClick={createNewChat}
+              className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700"
+            >
+              <Plus className="w-4 h-4" />
+              New Chat
+            </button>
+          </div>
+          {isLoadingChats ? (
+            <div className="text-center py-4 text-gray-500 text-sm">Loading...</div>
+          ) : chats.length === 0 ? (
+            <div className="text-center py-4 text-gray-500 text-sm">No chats yet</div>
+          ) : (
+            <div className="space-y-1">
+              {chats.map((chat) => (
+                <div
+                  key={chat._id}
+                  onClick={() => selectChat(chat._id)}
+                  className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${currentChatId === chat._id
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : 'hover:bg-gray-100 text-gray-700'
+                    }`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{chat.title}</p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(chat.updatedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                    </p>
+                  </div>
+                  <button
+                    onClick={(e) => deleteChat(chat._id, e)}
+                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 hover:text-red-600 rounded transition-all"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="border-b border-gray-200 bg-white px-3 py-2">
         <div className="grid grid-cols-2 gap-2">
@@ -978,6 +1273,28 @@ export default function AISidebar({
         className="flex-1 overflow-y-auto p-4 bg-gray-50 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400"
         style={{ maxHeight: "calc(100vh - 140px)" }}
       >
+        {/* Login Prompt for unauthenticated users */}
+        {!session?.user && status !== 'loading' && (
+          <div className="mb-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+            <p className="text-sm text-emerald-800 mb-3">
+              Sign in to save your chat history and continue conversations later.
+            </p>
+            <div className="flex gap-2">
+              <a
+                href="/login"
+                className="flex-1 text-center py-2 px-4 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors"
+              >
+                Sign In
+              </a>
+              <a
+                href="/register"
+                className="flex-1 text-center py-2 px-4 bg-white border border-emerald-300 text-emerald-700 text-sm font-medium rounded-lg hover:bg-emerald-50 transition-colors"
+              >
+                Sign Up
+              </a>
+            </div>
+          </div>
+        )}
         <div
           className="min-h-full flex flex-col justify-start space-y-4"
         >
@@ -1099,7 +1416,7 @@ export default function AISidebar({
                       : "text-gray-400"
                       }`}
                   >
-                    {message.timestamp.toLocaleTimeString([], {
+                    {new Date(message.timestamp).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}

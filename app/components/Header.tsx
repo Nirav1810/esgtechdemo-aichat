@@ -2,7 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { MessageCircle, Settings, Leaf } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { MessageCircle, Settings, Leaf, LogOut, User } from "lucide-react";
 
 interface HeaderProps {
   selectedYear: string;
@@ -27,6 +28,8 @@ export default function Header({
   activePage = "dashboard",
   onAskAIClick,
 }: HeaderProps) {
+  const { data: session, status } = useSession();
+  
   const handleAskAIClick = () => {
     if (onAskAIClick) {
       onAskAIClick();
@@ -139,20 +142,47 @@ export default function Header({
             <div className="h-6 w-px bg-gray-200"></div>
 
             {/* User Profile */}
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600 hidden sm:block">
-                Nirav Surti
-              </span>
-              <div className="w-9 h-9 bg-emerald-100 rounded-full flex items-center justify-center border-2 border-emerald-200">
-                <span className="text-sm font-semibold text-emerald-700">
-                  NS
-                </span>
+            {status === 'loading' ? (
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gray-100 rounded-full animate-pulse" />
               </div>
-            </div>
-
-            <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-              <Settings className="w-5 h-5" />
-            </button>
+            ) : session?.user ? (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600 hidden sm:block">
+                    {session.user.name || session.user.email}
+                  </span>
+                  <div className="w-9 h-9 bg-emerald-100 rounded-full flex items-center justify-center border-2 border-emerald-200">
+                    <User className="w-4 h-4 text-emerald-700" />
+                  </div>
+                </div>
+                <button
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                  title="Sign out"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
+                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                  <Settings className="w-5 h-5" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/login"
+                  className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-3 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

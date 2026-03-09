@@ -1,12 +1,34 @@
 import { NextResponse } from "next/server";
 
 const CHUTES_URL = "https://llm.chutes.ai/v1/chat/completions";
+
+// Filter out thinking/reasoning content from AI responses
+function filterThinkingContent(text: string): string {
+  let result = text;
+
+  // Remove <thinking>...</thinking> blocks
+  result = result.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
+  // Remove <reasoning>...</reasoning> blocks
+  result = result.replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '');
+  // Remove ```thinking blocks
+  result = result.replace(/```thinking[\s\S]*?```/gi, '');
+  // Remove ```json blocks that contain thinking
+  result = result.replace(/```json[\s\S]*?"thinking":[\s\S]*?```/gi, '');
+  // Remove any remaining unclosed thinking tags
+  result = result.replace(/<thinking>[\s\S]*$/gi, '');
+  result = result.replace(/<reasoning>[\s\S]*$/gi, '');
+  // Remove	othink tags (sometimes models use different formats)
+  result = result.replace(/<think>[\s\S]*?<\/思考>/gi, '');
+
+  return result;
+}
 const MODELS = [
-  "Qwen/Qwen3-32B",
+
   "Qwen/Qwen3-235B-A22B-Instruct-2507-TEE",
   "deepseek-ai/DeepSeek-V3.2-TEE",
   "NousResearch/Hermes-4-405B-FP8-TEE",
   "zai-org/GLM-4.7-TEE",
+  "Qwen/Qwen3-32B",
 ];
 const IMAGE_MODELS = [
   "zai-org/GLM-4.6V",
@@ -100,8 +122,16 @@ function getScopeEnforcementMode(): ScopeEnforcementMode {
 async function classifyScope(
   question: string
 ): Promise<"esg" | "greeting" | "out_of_scope"> {
-  const fallbackGreeting = /^(hi|hello|hey|good morning|good afternoon|good evening|yo|hola)\b/i.test(
-    question.trim()
+  const cleanQ = question.trim().toLowerCase();
+
+  // Fast path for simple greetings to avoid them being misinterpreted by the classifier
+  // e.g. "hii" being interpreted as HII (Huntington Ingalls Industries)
+  if (/^(h+i+|hello+|hey+|good morning|good afternoon|good evening|yo|hola|greetings?)$/.test(cleanQ)) {
+    return "greeting";
+  }
+
+  const fallbackGreeting = /^(h+i+|hello+|hey+|good morning|good afternoon|good evening|yo|hola|greetings?)\b/i.test(
+    cleanQ
   );
 
   try {
@@ -410,6 +440,29 @@ export async function POST(req: Request) {
       typeof body.model === "string" ? body.model.trim() : "";
   }
 
+  // Extract conversation history from request
+  let conversationHistory: { role: string; content: string }[] = [];
+  if (requestContentType.includes("multipart/form-data")) {
+    const formData = await req.formData();
+    const historyStr = formData.get("history") as string;
+    if (historyStr) {
+      try {
+        conversationHistory = JSON.parse(historyStr);
+      } catch {
+        conversationHistory = [];
+      }
+    }
+  } else {
+    try {
+      const body = await req.json();
+      if (body.history && Array.isArray(body.history)) {
+        conversationHistory = body.history;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   if (!question) {
     return NextResponse.json(
       { error: "Question is required." },
@@ -473,7 +526,9 @@ IMPORTANT:
 - If the user asks for ONLY negatives, fill the negatives array and leave positives empty []
 - If the user asks for BOTH, fill both arrays
 - ALWAYS use this JSON format for ANY question involving positives, negatives, benefits, drawbacks, pros, cons, etc.
-- NEVER use markdown bullet points for these types of questions - ONLY JSON format is allowed`;
+- NEVER use markdown bullet points for these types of questions - ONLY JSON format is allowed
+
+CRITICAL: DO NOT OUTPUT RAW JSON DATA OBJECTS for normal questions (e.g., summarizing data, providing insights, or explaining fields). For those, ALWAYS output readable text/markdown. ONLY use JSON for the mandatory analysis format described above.`;
 
   const ghgReportPrompt = `You are a specialized GHG Report AI Assistant. You help users understand and analyze detailed greenhouse gas emissions data from their reports.
 
@@ -508,31 +563,48 @@ IMPORTANT:
 - If the user asks for ONLY negatives, fill the negatives array and leave positives empty []
 - If the user asks for BOTH, fill both arrays
 - ALWAYS use this JSON format for ANY question involving positives, negatives, benefits, drawbacks, pros, cons, etc.
-- NEVER use markdown bullet points for these types of questions - ONLY JSON format is allowed`;
+- NEVER use markdown bullet points for these types of questions - ONLY JSON format is allowed
+
+CRITICAL: DO NOT OUTPUT RAW JSON DATA OBJECTS for normal questions (e.g., summarizing data, providing insights, or explaining fields). For those, ALWAYS output readable text/markdown. ONLY use JSON for the mandatory analysis format described above.`;
 
   const systemPrompt = pageType === "ghg-report" ? ghgReportPrompt : dashboardPrompt;
 
   const userMessage = `${combinedContext}User question: ${question}`;
 
-  const messages = [
+  // Build messages array with conversation history
+  const messages: { role: string; content: string | object[] }[] = [
     {
       role: "system",
       content: systemPrompt,
     },
-    {
-      role: "user",
-      content:
-        uploadedImageParts.length > 0
-          ? [
-            {
-              type: "text",
-              text: userMessage,
-            },
-            ...uploadedImageParts,
-          ]
-          : userMessage,
-    },
   ];
+
+  // Add conversation history (previous messages)
+  if (conversationHistory.length > 0) {
+    for (const msg of conversationHistory) {
+      if (msg.role === "user" || msg.role === "assistant") {
+        messages.push({
+          role: msg.role,
+          content: msg.content,
+        });
+      }
+    }
+  }
+
+  // Add current user message
+  messages.push({
+    role: "user",
+    content:
+      uploadedImageParts.length > 0
+        ? [
+          {
+            type: "text",
+            text: userMessage,
+          },
+          ...uploadedImageParts,
+        ]
+        : userMessage,
+  });
 
   try {
     let lastStatus = 500;
@@ -565,12 +637,85 @@ IMPORTANT:
 
       if (upstreamResponse.ok && upstreamResponse.body) {
         console.log(`Using model: ${model}`);
-        return new Response(upstreamResponse.body, {
+
+        // Create a transform stream to filter out thinking content
+        const { readable, writable } = new TransformStream();
+        const writer = writable.getWriter();
+        const encoder = new TextEncoder();
+
+        (async () => {
+          const reader = upstreamResponse.body?.getReader();
+          if (!reader) {
+            writer.close();
+            return;
+          }
+
+          let buffer = "";
+
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) {
+                // Process remaining buffer
+                if (buffer) {
+                  const cleaned = filterThinkingContent(buffer);
+                  if (cleaned) {
+                    writer.write(encoder.encode(cleaned));
+                  }
+                }
+                break;
+              }
+
+              const chunk = new TextDecoder().decode(value, { stream: true });
+              buffer += chunk;
+
+              // Process complete SSE lines
+              const lines = buffer.split('\n');
+              buffer = lines.pop() || "";
+
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  const data = line.slice(6);
+                  if (data === '[DONE]') {
+                    writer.write(encoder.encode('data: [DONE]\n\n'));
+                    continue;
+                  }
+                  try {
+                    const parsed = JSON.parse(data);
+                    const content = parsed.choices?.[0]?.delta?.content || "";
+                    if (content) {
+                      const cleaned = filterThinkingContent(content);
+                      if (cleaned) {
+                        const cleanedData = { ...parsed };
+                        cleanedData.choices = [{
+                          ...cleanedData.choices?.[0],
+                          delta: { ...cleanedData.choices?.[0]?.delta, content: cleaned }
+                        }];
+                        writer.write(encoder.encode(`data: ${JSON.stringify(cleanedData)}\n\n`));
+                      }
+                    } else {
+                      writer.write(encoder.encode(line + '\n\n'));
+                    }
+                  } catch {
+                    // Not JSON, write as-is
+                    writer.write(encoder.encode(line + '\n\n'));
+                  }
+                } else {
+                  writer.write(encoder.encode(line + '\n\n'));
+                }
+              }
+            }
+          } catch (error) {
+            console.error("Stream processing error:", error);
+          } finally {
+            writer.close();
+          }
+        })();
+
+        return new Response(readable, {
           status: upstreamResponse.status,
           headers: {
-            "Content-Type":
-              upstreamResponse.headers.get("content-type") ||
-              "text/event-stream",
+            "Content-Type": "text/event-stream",
             "X-Chutes-Model": model,
           },
         });
