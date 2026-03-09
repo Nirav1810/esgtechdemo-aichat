@@ -52,6 +52,7 @@ venv/
 
 # Generated / output files
 *.pptx
+!Sustainability and Environment Newsletter _ by Slidesgo.pptx
 *.pdf
 *.xlsx
 
