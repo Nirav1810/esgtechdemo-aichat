@@ -480,7 +480,6 @@ export default function AISidebar({
 
   const createNewChatWithMessages = async (chatPageType: string, messages: Message[]) => {
     if (!session?.user) {
-      console.log("No session user, cannot create chat");
       return;
     }
     try {
@@ -495,8 +494,6 @@ export default function AISidebar({
         ...msg,
         timestamp: msg.timestamp instanceof Date ? msg.timestamp.toISOString() : msg.timestamp,
       }));
-
-      console.log("Creating chat with:", { pageType: chatPageType, title, messagesCount: messages.length, firstMsg: messages[0]?.content?.slice(0, 30) });
 
       const res = await fetch('/api/chats', {
         method: 'POST',
@@ -515,7 +512,6 @@ export default function AISidebar({
       }
 
       const data = await res.json();
-      console.log("Created chat response:", data);
       if (data.chat) {
         setChats(prevChats => [data.chat, ...prevChats]);
         setCurrentChatId(data.chat._id);
@@ -1021,25 +1017,17 @@ export default function AISidebar({
           ? [...chatMessagesRef.current]
           : [...imageMessagesRef.current];
 
-        console.log("Saving messages:", updatedMessages.length);
-
         // Filter out empty assistant messages
         const validMessages = updatedMessages.filter(m =>
           m.role === 'user' || (m.role === 'assistant' && m.content && m.content.trim().length > 0)
         );
 
-        console.log("Save decision:", { currentChatId, validMessagesLength: validMessages.length, pageType, updatedMessagesCount: updatedMessages.length });
-
         if (currentChatId) {
           // Save to existing chat
-          console.log("Saving to existing chat:", currentChatId);
           await saveChat(updatedMessages);
         } else if (validMessages.length > 0) {
           // Create new chat with messages
-          console.log("Creating new chat, pageType:", pageType, "messages:", validMessages.map(m => `${m.role}: ${m.content?.slice(0, 20)}`));
           await createNewChatWithMessages(pageType, validMessages);
-        } else {
-          console.log("No valid messages to save, skipping...");
         }
       }
     } catch (error) {
@@ -1158,7 +1146,6 @@ export default function AISidebar({
 
   const handleVoiceTranscriptionComplete = (text: string) => {
     const trimmedText = text.trim();
-    console.log("AISidebar received transcription:", trimmedText);
     if (!trimmedText) {
       return;
     }

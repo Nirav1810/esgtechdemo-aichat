@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 
 interface UseVoiceInputOptions {
-  onTranscriptionComplete?: (text: string) => void;
+  onTranscriptionComplete?: (text: string) => void | Promise<void>;
   onError?: (error: string) => void;
 }
 
@@ -12,6 +12,7 @@ interface UseVoiceInputReturn {
   error: string | null;
   startRecording: () => Promise<void>;
   stopRecording: () => void;
+  cancelRecording: () => void;
   resetTranscript: () => void;
   isSupported: boolean;
 }
@@ -30,6 +31,14 @@ export function useVoiceInput(
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const shouldTranscribeOnStopRef = useRef(true);
+
+  const stopActiveStream = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     setIsSupported(typeof window !== "undefined" && "MediaRecorder" in window);
@@ -43,11 +52,13 @@ export function useVoiceInput(
       return;
     }
 
-    try {
-      setError(null);
-      audioChunksRef.current = [];
+      try {
+        setError(null);
+        setTranscript("");
+        audioChunksRef.current = [];
+        shouldTranscribeOnStopRef.current = true;
 
-      const stream = await navigator.mediaDevices.getUserMedia({
+        const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
@@ -70,6 +81,11 @@ export function useVoiceInput(
       };
 
       mediaRecorder.onstop = async () => {
+        if (!shouldTranscribeOnStopRef.current) {
+          stopActiveStream();
+          return;
+        }
+
         setIsProcessing(true);
 
         try {
@@ -91,12 +107,10 @@ export function useVoiceInput(
           }
 
           const data = await response.json();
-          console.log("Transcription response:", data);
           const text = data.transcript || data.text || "";
-          console.log("Transcribed text:", text);
           setTranscript(text);
           if (text.trim()) {
-            onTranscriptionComplete?.(text);
+            await onTranscriptionComplete?.(text);
           }
         } catch (err) {
           const errMsg =
@@ -105,10 +119,7 @@ export function useVoiceInput(
           onError?.(errMsg);
         } finally {
           setIsProcessing(false);
-          if (streamRef.current) {
-            streamRef.current.getTracks().forEach((track) => track.stop());
-            streamRef.current = null;
-          }
+          stopActiveStream();
         }
       };
 
@@ -123,11 +134,25 @@ export function useVoiceInput(
   }, [isSupported, onTranscriptionComplete, onError]);
 
   const stopRecording = useCallback(() => {
+    shouldTranscribeOnStopRef.current = true;
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
     }
   }, [isRecording]);
+
+  const cancelRecording = useCallback(() => {
+    shouldTranscribeOnStopRef.current = false;
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
+    } else {
+      stopActiveStream();
+    }
+
+    setIsRecording(false);
+    setIsProcessing(false);
+  }, [stopActiveStream]);
 
   const resetTranscript = useCallback(() => {
     setTranscript("");
@@ -136,14 +161,14 @@ export function useVoiceInput(
 
   useEffect(() => {
     return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-      }
+      shouldTranscribeOnStopRef.current = false;
       if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
         mediaRecorderRef.current.stop();
+      } else {
+        stopActiveStream();
       }
     };
-  }, []);
+  }, [stopActiveStream]);
 
   return {
     isRecording,
@@ -152,6 +177,7 @@ export function useVoiceInput(
     error,
     startRecording,
     stopRecording,
+    cancelRecording,
     resetTranscript,
     isSupported,
   };
