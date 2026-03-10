@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useId } from "react";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { MessageCircle, X, Send, Leaf, AlertTriangle, Download, Paperclip, FileText, Image as ImageIcon, Clock, Plus, Trash2, LogOut, History, GripVertical, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import VoiceInputButton from "./VoiceInputButton";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -1155,6 +1156,27 @@ export default function AISidebar({
     scrollToBottom();
   }, [activeMessages, interactionMode]);
 
+  const handleVoiceTranscriptionComplete = (text: string) => {
+    const trimmedText = text.trim();
+    console.log("AISidebar received transcription:", trimmedText);
+    if (!trimmedText) {
+      return;
+    }
+
+    setInputMessage((prev) => {
+      const nextValue = prev ? `${prev} ${trimmedText}` : trimmedText;
+
+      requestAnimationFrame(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          resizeTextarea(textareaRef.current);
+        }
+      });
+
+      return nextValue;
+    });
+  };
+
   const sendMessage = async () => {
     await processQuestion(inputMessage, false);
   };
@@ -1637,6 +1659,10 @@ export default function AISidebar({
           <p className="mb-2 text-xs text-red-600">{uploadError}</p>
         )}
         <div className="flex gap-2">
+          <VoiceInputButton
+            onTranscriptionComplete={handleVoiceTranscriptionComplete}
+            disabled={isLoading}
+          />
           <button
             type="button"
             onClick={handleAttachmentClick}

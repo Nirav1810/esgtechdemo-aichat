@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import AISidebar from "../components/AISidebar";
 
-export default function DetachedChatPage() {
+function DetachedChatContent() {
   const searchParams = useSearchParams();
   const pageType = (searchParams.get("pageType") as "dashboard" | "ghg-report") || "dashboard";
   const [contextData, setContextData] = useState<string>("");
@@ -31,7 +31,7 @@ export default function DetachedChatPage() {
     };
 
     window.addEventListener("message", handleMessage);
-    
+
     if (window.opener) {
       window.opener.postMessage({ type: "readyForChatData" }, "*");
     }
@@ -86,5 +86,20 @@ export default function DetachedChatPage() {
         isDetached={true}
       />
     </div>
+  );
+}
+
+export default function DetachedChatPage() {
+  return (
+    <Suspense fallback={
+      <div className="h-screen w-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Initializing environment...</p>
+        </div>
+      </div>
+    }>
+      <DetachedChatContent />
+    </Suspense>
   );
 }
