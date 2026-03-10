@@ -380,6 +380,7 @@ export async function POST(req: Request) {
   let preferredModel = "";
   let uploadedTextContext = "";
   let uploadedImageParts: ImagePart[] = [];
+  let conversationHistory: { role: string; content: string }[] = [];
 
   if (requestContentType.includes("multipart/form-data")) {
     try {
@@ -400,6 +401,15 @@ export async function POST(req: Request) {
         typeof formData.get("model") === "string"
           ? (formData.get("model") as string).trim()
           : "";
+
+      const historyStr = formData.get("history") as string;
+      if (historyStr) {
+        try {
+          conversationHistory = JSON.parse(historyStr);
+        } catch {
+          conversationHistory = [];
+        }
+      }
 
       const files = formData
         .getAll("files")
@@ -438,28 +448,9 @@ export async function POST(req: Request) {
     pageType = typeof body.pageType === "string" ? body.pageType : "dashboard";
     preferredModel =
       typeof body.model === "string" ? body.model.trim() : "";
-  }
 
-  // Extract conversation history from request
-  let conversationHistory: { role: string; content: string }[] = [];
-  if (requestContentType.includes("multipart/form-data")) {
-    const formData = await req.formData();
-    const historyStr = formData.get("history") as string;
-    if (historyStr) {
-      try {
-        conversationHistory = JSON.parse(historyStr);
-      } catch {
-        conversationHistory = [];
-      }
-    }
-  } else {
-    try {
-      const body = await req.json();
-      if (body.history && Array.isArray(body.history)) {
-        conversationHistory = body.history;
-      }
-    } catch {
-      // ignore
+    if (body.history && Array.isArray(body.history)) {
+      conversationHistory = body.history;
     }
   }
 
@@ -505,13 +496,15 @@ export async function POST(req: Request) {
       "Policy reminder: user request appears non-ESG. You must refuse non-ESG requests with this exact sentence: \"I am an AI chatbot for ESG topics, so I cannot answer general-purpose questions. Please ask about ESG, sustainability, emissions, climate reporting, or related topics.\"\n\n";
   }
 
+  const scopeRestrictionText = scopeMode !== "off"
+    ? "\nSCOPE RESTRICTION: You are strictly an ESG assistant. If a user asks a non-ESG question, refuse briefly and ask them to provide an ESG-related question.\n"
+    : "";
+
   // Different system prompts based on page type
   const dashboardPrompt = `You are an expert ESG (Environmental, Social, and Governance) consultant assistant. You help users understand their greenhouse gas emissions data, provide sustainability insights, and suggest improvements.
 
 CRITICAL INSTRUCTION: You MUST respond ONLY in English. Do NOT use any other language including Chinese, Korean, Japanese, or any other language. All responses must be in clear, professional English.
-
-SCOPE RESTRICTION: You are strictly an ESG assistant. If a user asks a non-ESG question, refuse briefly and ask them to provide an ESG-related question.
-
+${scopeRestrictionText}
 You have access to dashboard data and, when available, web search results. Only analyze or summarize this data when the user explicitly asks for a summary, insights, or asks a question that requires the data. If the user greets or makes small talk, respond briefly and do not summarize the dashboard data.
 
 For factual questions about ESGtech.ai as a company (founders, ownership, investors, legal entity details, founding year, headquarters, or similar), you must rely only on explicit information provided in the dashboard context or web search results. If the information is not clearly present, you must say that you do not know and recommend checking the official ESGtech.ai website or other authoritative public sources. Never invent or guess names, dates, roles, or organizations.
@@ -533,9 +526,7 @@ CRITICAL: DO NOT OUTPUT RAW JSON DATA OBJECTS for normal questions (e.g., summar
   const ghgReportPrompt = `You are a specialized GHG Report AI Assistant. You help users understand and analyze detailed greenhouse gas emissions data from their reports.
 
 CRITICAL INSTRUCTION: You MUST respond ONLY in English. Do NOT use any other language including Chinese, Korean, Japanese, or any other language. All responses must be in clear, professional English.
-
-SCOPE RESTRICTION: You are strictly an ESG assistant. If a user asks a non-ESG question, refuse briefly and ask them to provide an ESG-related question.
-
+${scopeRestrictionText}
 You have access to detailed GHG Report data including:
 - Scope 1 emissions: Stationary Combustion, Mobile Combustion, Fugitive Emissions
 - Scope 2 emissions: Purchased Electricity, Purchased Heat and Steam, Renewable Electricity Generation
