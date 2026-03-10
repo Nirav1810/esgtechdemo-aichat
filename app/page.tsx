@@ -221,7 +221,7 @@ const CircularProgress = ({
   size?: number;
 }) => {
   const percentage = Math.min((value / max) * 100, 100);
-  const strokeWidth = 8;
+  const strokeWidth = 6;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (percentage / 100) * circumference;
@@ -229,12 +229,18 @@ const CircularProgress = ({
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="transform -rotate-90">
+        <defs>
+          <linearGradient id={`progress-${color.replace('#', '')}`} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={color} stopOpacity={1}/>
+            <stop offset="100%" stopColor={color} stopOpacity={0.6}/>
+          </linearGradient>
+        </defs>
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#e5e7eb"
+          stroke="#f3f4f6"
           strokeWidth={strokeWidth}
         />
         <circle
@@ -242,17 +248,17 @@ const CircularProgress = ({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke={color}
+          stroke={`url(#progress-${color.replace('#', '')})`}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          className="transition-all duration-500"
+          className="transition-all duration-700 ease-out"
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-lg font-semibold text-gray-700">
-          {percentage.toFixed(2)}%
+        <span className="text-base font-bold text-gray-800">
+          {percentage.toFixed(0)}%
         </span>
       </div>
     </div>
@@ -277,25 +283,35 @@ const ScopeCard = ({
   baselineValue?: number;
   baselineYear?: string | null;
 }) => {
+  const delta = baselineYear && typeof baselineValue === "number" ? value - baselineValue : null;
+  const isPositive = delta !== null ? delta > 0 : false;
+  
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+    <div className="bg-white rounded-2xl p-5 shadow-lg border border-gray-100/50 overflow-hidden relative">
+      {/* Colored top accent */}
+      <div className="absolute top-0 left-0 right-0 h-1" style={{ background: `linear-gradient(90deg, ${color}, ${color}80)` }} />
+      
       <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-gray-600 text-sm font-medium mb-1">{title}</h3>
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-bold text-gray-900">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+            <h3 className="text-gray-500 text-sm font-medium">{title}</h3>
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-3xl font-bold text-gray-900 tracking-tight">
               {value.toLocaleString('en-US')}
             </span>
-            <span className="text-sm text-gray-500">{unit}</span>
+            <span className="text-xs text-gray-400">{unit}</span>
           </div>
+          {delta !== null && (
+            <div className={`mt-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${isPositive ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
+              {isPositive ? '↑' : '↓'} {Math.abs(delta).toLocaleString()} {unit}
+              <span className="text-gray-400 ml-1">vs {baselineYear}</span>
+            </div>
+          )}
         </div>
-        <CircularProgress value={percentage} max={100} color={color} size={70} />
+        <CircularProgress value={percentage} max={100} color={color} size={72} />
       </div>
-      {baselineYear && typeof baselineValue === "number" && (
-        <p className="text-xs text-gray-500 mt-3">
-          vs {baselineYear}: {formatDelta(value - baselineValue)} {unit}
-        </p>
-      )}
     </div>
   );
 };
@@ -372,12 +388,16 @@ export default function ESGDashboard() {
             {/* KPI Cards Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
               {/* Main Total Emissions Card */}
-              <div className="lg:col-span-1 bg-gradient-to-br from-[#3e6b3e] to-[#2d522d] rounded-xl p-6 text-white shadow-lg">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <div className="lg:col-span-1 bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-800 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
+                {/* Decorative elements */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+                
+                <div className="flex items-start justify-between mb-4 relative">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
                     <Factory className="w-6 h-6 text-white" />
                   </div>
-                  <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                  <span className="text-xs bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full font-medium">
                     FY {dashboardData.fiscal_year}
                   </span>
                 </div>
@@ -385,22 +405,22 @@ export default function ESGDashboard() {
                   Total GHG Emissions
                 </h3>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold">
+                  <span className="text-4xl font-bold tracking-tight">
                     {dashboardData.total_emissions.toLocaleString('en-US')}
                   </span>
                   <span className="text-emerald-200 text-sm">TCO2Eq</span>
                 </div>
-                <div className="mt-4 pt-4 border-t border-white/20">
+                <div className="mt-5 pt-4 border-t border-white/20">
                   <div className="flex items-center gap-2 text-sm text-emerald-100">
                     <BarChart3 className="w-4 h-4" />
                     <span>Across all scopes</span>
                   </div>
                   {baselineSummary && baselineLabel && totalDelta !== null && (
-                    <div className="mt-3 flex items-center gap-2 text-xs text-emerald-100/90">
-                      <span className="text-sm font-semibold text-white">
-                        {formatDelta(totalDelta)} TCO2Eq
+                    <div className={`mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold ${totalDelta > 0 ? 'bg-red-500/20 text-red-100' : 'bg-emerald-500/20 text-emerald-100'}`}>
+                      <span>
+                        {totalDelta > 0 ? '↑' : '↓'} {Math.abs(totalDelta).toLocaleString()} TCO2Eq
                       </span>
-                      <span>vs {baselineLabel}</span>
+                      <span className="opacity-70">vs {baselineLabel}</span>
                     </div>
                   )}
                 </div>
@@ -443,10 +463,10 @@ export default function ESGDashboard() {
             {/* Charts Section */}
             <div className="space-y-6">
               {/* Scope 1 Chart */}
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100/50">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-bold text-gray-900">
                       Scope 1
                     </h3>
                     <p className="text-sm text-gray-500">
@@ -464,37 +484,66 @@ export default function ESGDashboard() {
                 </div>
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={scope1Data}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="#f3f4f6"
+                    <BarChart data={scope1Data} barCategoryGap="20%">
+                      <defs>
+                        <linearGradient id="stationaryGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#10b981" stopOpacity={1}/>
+                          <stop offset="100%" stopColor="#059669" stopOpacity={0.8}/>
+                        </linearGradient>
+                        <linearGradient id="mobileGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#ec4899" stopOpacity={1}/>
+                          <stop offset="100%" stopColor="#db2777" stopOpacity={0.8}/>
+                        </linearGradient>
+                        <linearGradient id="fugitiveGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#3b82f6" stopOpacity={1}/>
+                          <stop offset="100%" stopColor="#2563eb" stopOpacity={0.8}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                      <XAxis 
+                        dataKey="month" 
+                        stroke="#6b7280" 
+                        fontSize={12} 
+                        tickLine={false}
+                        axisLine={false}
                       />
-                      <XAxis dataKey="month" stroke="#9ca3af" fontSize={12} />
-                      <YAxis stroke="#9ca3af" fontSize={12} />
+                      <YAxis 
+                        stroke="#6b7280" 
+                        fontSize={12} 
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                      />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#fff",
-                          border: "1px solid #e5e7eb",
-                          borderRadius: "8px",
+                          backgroundColor: "rgba(255, 255, 255, 0.95)",
+                          border: "none",
+                          borderRadius: "12px",
+                          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+                          padding: "12px",
                         }}
+                        cursor={{ fill: '#f9fafb' }}
                       />
                       <Bar
                         dataKey="stationary"
                         stackId="a"
-                        fill="#10b981"
+                        fill="url(#stationaryGradient)"
                         radius={[0, 0, 0, 0]}
+                        maxBarSize={50}
                       />
                       <Bar
                         dataKey="mobile"
                         stackId="a"
-                        fill="#ec4899"
+                        fill="url(#mobileGradient)"
                         radius={[0, 0, 0, 0]}
+                        maxBarSize={50}
                       />
                       <Bar
                         dataKey="fugitive"
                         stackId="a"
-                        fill="#3b82f6"
-                        radius={[4, 4, 0, 0]}
+                        fill="url(#fugitiveGradient)"
+                        radius={[6, 6, 0, 0]}
+                        maxBarSize={50}
                       />
                     </BarChart>
                   </ResponsiveContainer>
@@ -516,7 +565,7 @@ export default function ESGDashboard() {
               </div>
 
               {/* Scope 2 Chart */}
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100/50">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">
@@ -538,17 +587,42 @@ export default function ESGDashboard() {
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={scope2Data}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="#f3f4f6"
+                      <defs>
+                        <linearGradient id="renewableGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#10b981" stopOpacity={0.4}/>
+                          <stop offset="100%" stopColor="#10b981" stopOpacity={0.05}/>
+                        </linearGradient>
+                        <linearGradient id="importedGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#ec4899" stopOpacity={0.4}/>
+                          <stop offset="100%" stopColor="#ec4899" stopOpacity={0.05}/>
+                        </linearGradient>
+                        <linearGradient id="electricityGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.4}/>
+                          <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.05}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                      <XAxis 
+                        dataKey="month" 
+                        stroke="#6b7280" 
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
                       />
-                      <XAxis dataKey="month" stroke="#9ca3af" fontSize={12} />
-                      <YAxis stroke="#9ca3af" fontSize={12} />
+                      <YAxis 
+                        stroke="#6b7280" 
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                      />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#fff",
-                          border: "1px solid #e5e7eb",
-                          borderRadius: "8px",
+                          backgroundColor: "rgba(255, 255, 255, 0.95)",
+                          border: "none",
+                          borderRadius: "12px",
+                          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+                          padding: "12px",
                         }}
                       />
                       <Area
@@ -556,24 +630,24 @@ export default function ESGDashboard() {
                         dataKey="renewable"
                         stackId="a"
                         stroke="#10b981"
-                        fill="#10b981"
-                        fillOpacity={0.6}
+                        fill="url(#renewableGradient)"
+                        strokeWidth={2}
                       />
                       <Area
                         type="monotone"
                         dataKey="imported"
                         stackId="a"
                         stroke="#ec4899"
-                        fill="#ec4899"
-                        fillOpacity={0.6}
+                        fill="url(#importedGradient)"
+                        strokeWidth={2}
                       />
                       <Area
                         type="monotone"
                         dataKey="electricity"
                         stackId="a"
                         stroke="#3b82f6"
-                        fill="#3b82f6"
-                        fillOpacity={0.6}
+                        fill="url(#electricityGradient)"
+                        strokeWidth={2}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -595,7 +669,7 @@ export default function ESGDashboard() {
               </div>
 
               {/* Scope 3 Chart */}
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100/50">
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-gray-900">
                     Scope 3
@@ -607,28 +681,44 @@ export default function ESGDashboard() {
                 <div className="h-[400px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
+                      <defs>
+                        {scope3Data.map((entry: Scope3Slice, index: number) => (
+                          <linearGradient key={`gradient-${index}`} id={`pieGradient-${index}`} x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor={entry.color} stopOpacity={1}/>
+                            <stop offset="100%" stopColor={entry.color} stopOpacity={0.7}/>
+                          </linearGradient>
+                        ))}
+                      </defs>
                       <Pie
                         data={scope3Data}
                         cx="50%"
                         cy="50%"
-                        innerRadius={80}
-                        outerRadius={140}
-                        paddingAngle={2}
+                        innerRadius={100}
+                        outerRadius={150}
+                        paddingAngle={3}
                         dataKey="value"
+                        animationBegin={0}
+                        animationDuration={800}
                       >
                         {scope3Data.map((entry: Scope3Slice, index: number) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={`url(#pieGradient-${index})`}
+                            stroke="none"
+                          />
                         ))}
                       </Pie>
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#fff",
-                          border: "1px solid #e5e7eb",
-                          borderRadius: "8px",
+                          backgroundColor: "rgba(255, 255, 255, 0.95)",
+                          border: "none",
+                          borderRadius: "12px",
+                          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+                          padding: "12px",
                         }}
                         formatter={(value) => {
                           const numValue = typeof value === 'number' ? value : 0;
-                          return [`${numValue} TCO2Eq`, ''];
+                          return [numValue.toLocaleString() + ' TCO2Eq', ''];
                         }}
                       />
                       <Legend
@@ -636,6 +726,9 @@ export default function ESGDashboard() {
                         align="right"
                         layout="vertical"
                         iconType="circle"
+                        iconSize={10}
+                        wrapperStyle={{ fontSize: '12px', paddingLeft: '20px' }}
+                        formatter={(value) => <span style={{ color: '#374151', fontWeight: 500 }}>{value}</span>}
                       />
                     </PieChart>
                   </ResponsiveContainer>
