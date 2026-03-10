@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useId } from "react";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
-import { MessageCircle, X, Send, Leaf, AlertTriangle, Download, Paperclip, FileText, Image as ImageIcon, Clock, Plus, Trash2, LogOut, History } from "lucide-react";
+import { MessageCircle, X, Send, Leaf, AlertTriangle, Download, Paperclip, FileText, Image as ImageIcon, Clock, Plus, Trash2, LogOut, History, GripVertical, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -112,6 +112,10 @@ interface AISidebarProps {
   pageType: "dashboard" | "ghg-report";
   title?: string;
   subtitle?: string;
+  width?: number;
+  onWidthChange?: (width: number) => void;
+  isDetached?: boolean;
+  onDetach?: () => void;
 }
 
 // Helper function to clean LaTeX/math notation from AI responses
@@ -314,7 +318,11 @@ export default function AISidebar({
   contextData,
   pageType,
   title = "AI Companion",
-  subtitle = "Powered by GPT-OSS-120B",
+  subtitle = "Powered by Chutes AI",
+  width: initialWidth,
+  onWidthChange,
+  isDetached = false,
+  onDetach,
 }: AISidebarProps) {
   const starGradientId = useId();
   const starHighlightId = useId();
@@ -356,6 +364,11 @@ export default function AISidebar({
     "chat"
   );
   const [loadingLabel, setLoadingLabel] = useState<string>("Analysing");
+  const [sidebarWidth, setSidebarWidth] = useState<number>(initialWidth || 400);
+  const [isResizing, setIsResizing] = useState(false);
+  const sidebarWidthRef = useRef(initialWidth || 400);
+  const isResizingRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -389,6 +402,56 @@ export default function AISidebar({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, isOpen, pageType]);
+
+  // Sync width from props
+  useEffect(() => {
+    if (initialWidth) {
+      setSidebarWidth(initialWidth);
+    }
+  }, [initialWidth]);
+
+  // Resize handlers - using direct DOM manipulation for smooth performance
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    isResizingRef.current = true;
+    setIsResizing(true);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizingRef.current || !containerRef.current) return;
+      const newWidth = window.innerWidth - e.clientX;
+      const clampedWidth = Math.min(Math.max(newWidth, 250), 800);
+      sidebarWidthRef.current = clampedWidth;
+      // Direct DOM manipulation - no re-render during drag
+      containerRef.current.style.width = `${clampedWidth}px`;
+    };
+
+    const handleMouseUp = () => {
+      if (isResizingRef.current) {
+        isResizingRef.current = false;
+        setIsResizing(false);
+        // Sync final width to React state and parent
+        setSidebarWidth(sidebarWidthRef.current);
+        onWidthChange?.(sidebarWidthRef.current);
+      }
+    };
+
+    if (isResizing) {
+      document.body.style.cursor = "ew-resize";
+      document.body.style.userSelect = "none";
+    }
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [isResizing, onWidthChange]);
 
   const loadChats = async () => {
     if (!session?.user) return;
@@ -1142,9 +1205,22 @@ export default function AISidebar({
 
   return (
     <div
-      className={`bg-white border-l border-gray-200 flex flex-col h-full transition-all duration-300 ease-in-out ${isOpen ? "w-[400px] opacity-100" : "w-0 opacity-0 overflow-hidden"
+      ref={containerRef}
+      className={`bg-white border-l border-gray-200 flex flex-col h-full transition-all duration-300 ease-in-out ${isOpen ? "opacity-100" : "w-0 opacity-0 overflow-hidden"
         }`}
+      style={{
+        width: isOpen ? (isResizing ? sidebarWidthRef.current : sidebarWidth) : 0,
+        transition: isResizing ? 'none' : undefined
+      }}
     >
+      {/* Resize Handle - only show when not detached */}
+      {!isDetached && (
+        <div
+          className={`absolute left-0 top-0 h-full w-1.5 cursor-ew-resize hover:bg-emerald-400 transition-colors z-10 ${isResizing ? 'bg-emerald-500' : ''}`}
+          onMouseDown={handleMouseDown}
+          title="Drag to resize"
+        />
+      )}
       {/* Header */}
       <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-emerald-600 to-emerald-700">
         <div className="flex items-center gap-2">
@@ -1157,6 +1233,23 @@ export default function AISidebar({
           </div>
         </div>
         <div className="flex items-center gap-1">
+          {isDetached ? (
+            <button
+              onClick={onClose}
+              className="text-white/80 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10"
+              title="Back to sidebar"
+            >
+              <ArrowDownLeft className="w-5 h-5" />
+            </button>
+          ) : (
+            <button
+              onClick={onDetach}
+              className="text-white/80 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10"
+              title="Pop out as window"
+            >
+              <ArrowUpRight className="w-5 h-5" />
+            </button>
+          )}
           {session?.user && (
             <button
               onClick={() => setShowChatList(!showChatList)}

@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import Header from "./components/Header";
 import AISidebar from "./components/AISidebar";
+import DetachedAIChat from "./components/DetachedAIChat";
 
 // Helper function to clean LaTeX/math notation from AI responses
 const cleanLatex = (content: string): string => {
@@ -309,6 +310,8 @@ export default function ESGDashboard() {
     defaultBaseline
   );
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(400);
+  const [isDetached, setIsDetached] = useState(false);
   const [contextData, setContextData] = useState<string>(() =>
     buildContextPayload(YEAR_DATASETS[defaultYear])
   );
@@ -341,9 +344,8 @@ export default function ESGDashboard() {
     <div className="min-h-screen bg-gray-50 flex">
       {/* Main Content */}
       <main
-        className={`flex-1 flex flex-col transition-all duration-300 ${
-          sidebarOpen ? "mr-[400px]" : ""
-        }`}
+        className="flex-1 flex flex-col transition-all duration-300"
+        style={{ marginRight: (sidebarOpen && !isDetached) ? sidebarWidth : 0 }}
       >
         <Header
           selectedYear={selectedYear}
@@ -645,15 +647,35 @@ export default function ESGDashboard() {
         </div>
       </main>
 
-      {/* AI Sidebar */}
-      <div className="fixed right-0 top-0 h-full z-50">
-        <AISidebar
+      {/* AI Sidebar - Only show when not detached */}
+      {!isDetached && (
+        <div className="fixed right-0 top-0 h-full z-50">
+          <AISidebar
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+            contextData={contextData}
+            pageType="dashboard"
+            width={sidebarWidth}
+            onWidthChange={setSidebarWidth}
+            isDetached={isDetached}
+            onDetach={() => setIsDetached(true)}
+          />
+        </div>
+      )}
+
+      {/* Detached window handler */}
+      {isDetached && (
+        <DetachedAIChat
           isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
+          onClose={() => {
+            setIsDetached(false);
+            setSidebarOpen(false);
+          }}
           contextData={contextData}
           pageType="dashboard"
+          onDock={() => setIsDetached(false)}
         />
-      </div>
+      )}
     </div>
   );
 }

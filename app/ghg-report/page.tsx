@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import AISidebar from "../components/AISidebar";
+import DetachedAIChat from "../components/DetachedAIChat";
 import { Download, ChevronDown, Filter } from "lucide-react";
 
 // Types
@@ -597,6 +598,8 @@ export default function GHGReportPage() {
   const [selectedYear, setSelectedYear] = useState("FY 2025-26");
   const [baselineYear, setBaselineYear] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(400);
+  const [isDetached, setIsDetached] = useState(false);
   const [fromDate, setFromDate] = useState("Apr - 2025");
   const [toDate, setToDate] = useState("Mar - 2026");
   const [selectedSite, setSelectedSite] = useState("All Sites");
@@ -617,9 +620,8 @@ export default function GHGReportPage() {
     <div className="min-h-screen bg-gray-50 flex">
       {/* Main Content */}
       <main
-        className={`flex-1 flex flex-col transition-all duration-300 ${
-          sidebarOpen ? "mr-[400px]" : ""
-        }`}
+        className="flex-1 flex flex-col transition-all duration-300"
+        style={{ marginRight: (sidebarOpen && !isDetached) ? sidebarWidth : 0 }}
       >
       <Header
         selectedYear={selectedYear}
@@ -1075,16 +1077,36 @@ export default function GHGReportPage() {
         </div>
       </main>
 
-      {/* AI Sidebar */}
-      <div className="fixed right-0 top-0 h-full z-50">
-        <AISidebar
+      {/* AI Sidebar - Only show when not detached */}
+      {!isDetached && (
+        <div className="fixed right-0 top-0 h-full z-50">
+          <AISidebar
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+            contextData={contextData}
+            pageType="ghg-report"
+            title="AI Companion"
+            width={sidebarWidth}
+            onWidthChange={setSidebarWidth}
+            isDetached={isDetached}
+            onDetach={() => setIsDetached(true)}
+          />
+        </div>
+      )}
+
+      {/* Detached window handler */}
+      {isDetached && (
+        <DetachedAIChat
           isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
+          onClose={() => {
+            setIsDetached(false);
+            setSidebarOpen(false);
+          }}
           contextData={contextData}
           pageType="ghg-report"
-          title="AI Companion"
+          onDock={() => setIsDetached(false)}
         />
-      </div>
+      )}
     </div>
   );
 }
