@@ -70,6 +70,125 @@ const API_KEY = PRIMARY_API_KEY || FALLBACK_API_KEY;
 
 const TAVILY_API_KEY = process.env.TAVILY_API_KEY || "";
 
+// Tool definitions for emissions data
+const TOOL_DEFINITIONS = [
+  {
+    type: "function",
+    function: {
+      name: "get_emissions_summary",
+      description: "Get GHG emissions summary for a fiscal year including total emissions, Scope 1, 2, 3 values and percentages",
+      parameters: {
+        type: "object",
+        properties: {
+          fiscal_year: { type: "string", description: "The fiscal year to fetch (e.g., 'FY 2025-26')" }
+        },
+        required: ["fiscal_year"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_scope1_monthly",
+      description: "Get Scope 1 monthly emissions data including stationary, mobile, and fugitive emissions",
+      parameters: {
+        type: "object",
+        properties: {
+          fiscal_year: { type: "string", description: "The fiscal year to fetch (e.g., 'FY 2025-26')" }
+        },
+        required: ["fiscal_year"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_scope2_monthly",
+      description: "Get Scope 2 monthly emissions data including renewable, imported, and electricity data",
+      parameters: {
+        type: "object",
+        properties: {
+          fiscal_year: { type: "string", description: "The fiscal year to fetch (e.g., 'FY 2025-26')" }
+        },
+        required: ["fiscal_year"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_scope3_categories",
+      description: "Get Scope 3 category breakdown with values for purchased goods, travel, waste, etc.",
+      parameters: {
+        type: "object",
+        properties: {
+          fiscal_year: { type: "string", description: "The fiscal year to fetch (e.g., 'FY 2025-26')" }
+        },
+        required: ["fiscal_year"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_emission_records",
+      description: "Get detailed emission records for specific scope and category",
+      parameters: {
+        type: "object",
+        properties: {
+          fiscal_year: { type: "string", description: "The fiscal year to fetch" },
+          scope: { type: "number", description: "Scope number (1, 2, or 3)" },
+          category: { type: "string", description: "Category name (e.g., 'Stationary Combustion', 'Purchased Goods')" }
+        },
+        required: ["fiscal_year"]
+      }
+    }
+  }
+];
+
+// Execute tool calls
+async function executeTool(toolName: string, args: any): Promise<any> {
+  const { fiscal_year, scope, category } = args;
+  
+  try {
+    if (toolName === "get_emissions_summary") {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/emissions/${fiscal_year}`);
+      const data = await res.json();
+      if (data.error) return { error: data.error };
+      return data.summary;
+    }
+    
+    if (toolName === "get_scope1_monthly") {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/emissions/${fiscal_year}/monthly?scope=1`);
+      return await res.json();
+    }
+    
+    if (toolName === "get_scope2_monthly") {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/emissions/${fiscal_year}/monthly?scope=2`);
+      return await res.json();
+    }
+    
+    if (toolName === "get_scope3_categories") {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/emissions/${fiscal_year}/categories`);
+      return await res.json();
+    }
+    
+    if (toolName === "get_emission_records") {
+      let url = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/emissions/${fiscal_year}/records`;
+      const params = new URLSearchParams();
+      if (scope) params.append("scope", scope.toString());
+      if (category) params.append("category", category);
+      if (params.toString()) url += "?" + params.toString();
+      const res = await fetch(url);
+      return await res.json();
+    }
+    
+    return { error: "Unknown tool" };
+  } catch (error) {
+    return { error: "Failed to execute tool: " + (error as Error).message };
+  }
+}
+
 async function performWebSearch(query: string): Promise<string | null> {
   if (!TAVILY_API_KEY) return null;
 
@@ -505,7 +624,7 @@ export async function POST(req: Request) {
 
 CRITICAL INSTRUCTION: You MUST respond ONLY in English. Do NOT use any other language including Chinese, Korean, Japanese, or any other language. All responses must be in clear, professional English.
 ${scopeRestrictionText}
-You have access to dashboard data and, when available, web search results. Only analyze or summarize this data when the user explicitly asks for a summary, insights, or asks a question that requires the data. If the user greets or makes small talk, respond briefly and do not summarize the dashboard data.
+You have access to dashboard data and, when available, web search results. You also have tools available to fetch emissions data dynamically - use them when the user asks for specific data that may require fresh values from the database.
 
 For factual questions about ESGtech.ai as a company (founders, ownership, investors, legal entity details, founding year, headquarters, or similar), you must rely only on explicit information provided in the dashboard context or web search results. If the information is not clearly present, you must say that you do not know and recommend checking the official ESGtech.ai website or other authoritative public sources. Never invent or guess names, dates, roles, or organizations.
 
@@ -531,6 +650,8 @@ You have access to detailed GHG Report data including:
 - Scope 1 emissions: Stationary Combustion, Mobile Combustion, Fugitive Emissions
 - Scope 2 emissions: Purchased Electricity, Purchased Heat and Steam, Renewable Electricity Generation
 - Scope 3 emissions: Employee Commute, Food Consumption, Purchased Goods, Transmission & Distribution Loss
+
+You also have tools available to fetch emissions data dynamically - use them when the user asks for specific data that may require fresh values from the database.
 
 CAPABILITIES:
 1. SUMMARIZATION: When asked to summarize, provide concise overviews of emission categories, total values, and key insights. Do NOT summarize unless explicitly asked.
@@ -620,6 +741,7 @@ CRITICAL: DO NOT OUTPUT RAW JSON DATA OBJECTS for normal questions (e.g., summar
         body: JSON.stringify({
           model,
           messages,
+          tools: TOOL_DEFINITIONS,
           temperature: 0.7,
           max_tokens: MAX_TOKENS,
           stream: true,

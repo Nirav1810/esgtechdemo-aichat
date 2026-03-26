@@ -7,6 +7,7 @@ import { MessageCircle, X, Send, Leaf, AlertTriangle, Download, Paperclip, FileT
 import VoiceInputButton from "./VoiceInputButton";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import DownloadChatPDF from "./DownloadChatPDF";
 
 // Interface for structured analysis responses
 interface AnalysisData {
@@ -1268,6 +1269,9 @@ export default function AISidebar({
               <History className="w-5 h-5" />
             </button>
           )}
+          <DownloadChatPDF
+            pageType={pageType}
+          />
           <button
             onClick={onClose}
             className="text-white/80 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10"

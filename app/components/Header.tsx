@@ -13,8 +13,9 @@ interface HeaderProps {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   yearOptions: string[];
-  activePage?: "dashboard" | "ghg-reports";
+  activePage?: "dashboard" | "ghg-reports" | "edit-data";
   onAskAIClick?: () => void;
+  showBaseline?: boolean;
 }
 
 export default function Header({
@@ -27,6 +28,7 @@ export default function Header({
   yearOptions,
   activePage = "dashboard",
   onAskAIClick,
+  showBaseline = true,
 }: HeaderProps) {
   const { data: session, status } = useSession();
   
@@ -80,6 +82,12 @@ export default function Header({
                 GHG Reports
               </Link>
               <Link
+                href="/edit-data"
+                className={getNavClass("edit-data")}
+              >
+                Edit Data
+              </Link>
+              <Link
                 href="#"
                 className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors pb-4 -mb-4"
               >
@@ -107,6 +115,7 @@ export default function Header({
                   ))}
                 </select>
               </div>
+              {showBaseline && (
               <div className="flex flex-col min-w-[180px]">
                 <span className="text-[11px] uppercase tracking-wide text-gray-500 font-semibold">
                   Baseline Year (Optional)
@@ -124,6 +133,7 @@ export default function Header({
                   ))}
                 </select>
               </div>
+              )}
             </div>
 
             {/* AI Button */}

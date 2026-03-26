@@ -19,6 +19,7 @@ import {
 import {
   BarChart3,
   Factory,
+  RefreshCw,
 } from "lucide-react";
 import Header from "./components/Header";
 import AISidebar from "./components/AISidebar";
@@ -105,108 +106,6 @@ interface Scope3Slice {
   value: number;
   color: string;
 }
-
-interface YearDataset {
-  summary: DashboardData & {
-    breakdown: {
-      scope_1_percentage: number;
-      scope_2_percentage: number;
-      scope_3_percentage: number;
-    };
-    top_emitters: string[];
-  };
-  scope1Data: Scope1MonthlyRecord[];
-  scope2Data: Scope2MonthlyRecord[];
-  scope3Data: Scope3Slice[];
-}
-
-const YEAR_DATASETS = {
-  "FY 2025-26": {
-    summary: {
-      current_view: "GHG Dashboard",
-      fiscal_year: "2025-26",
-      total_emissions: 87725.26,
-      scope_1: { value: 35533.1, status: "Data available" },
-      scope_2: { value: 6352.18, status: "Data available" },
-      scope_3: { value: 45839.982416, status: "Data available" },
-      breakdown: {
-        scope_1_percentage: 40.50,
-        scope_2_percentage: 7.24,
-        scope_3_percentage: 52.26,
-      },
-      top_emitters: [
-        "Scope 3 - Purchased Goods (52.25%)",
-        "Scope 1 - Stationary Combustion (40.50%)",
-        "Scope 2 - Imported Electricity (7.24%)",
-      ],
-    },
-    scope1Data: [
-      { month: "Apr", stationary: 8526.23, mobile: 0, fugitive: 1300.0 },
-      { month: "May", stationary: 1750.93, mobile: 0, fugitive: 0 },
-      { month: "Jun", stationary: 54.34, mobile: 0, fugitive: 0 },
-      { month: "Jul", stationary: 533.51, mobile: 0, fugitive: 0 },
-      { month: "Aug", stationary: 595.14, mobile: 0, fugitive: 0 },
-      { month: "Sep", stationary: 349.96, mobile: 0, fugitive: 0 },
-      { month: "Oct", stationary: 0.23, mobile: 0, fugitive: 0 },
-      { month: "Nov", stationary: 2570.23, mobile: 0, fugitive: 14.22 },
-      { month: "Dec", stationary: 0, mobile: 0, fugitive: 30.82 },
-      { month: "Jan", stationary: 15296.19, mobile: 0, fugitive: 4464.03 },
-      { month: "Feb", stationary: 0, mobile: 0, fugitive: 29.76 },
-      { month: "Mar", stationary: 0, mobile: 0, fugitive: 0 },
-    ],
-    scope2Data: [
-      { month: "Apr", renewable: 0, imported: 0, electricity: 1.57 },
-      { month: "May", renewable: 0, imported: 0, electricity: 186.53 },
-      { month: "Jun", renewable: 0, imported: 0, electricity: 0.22 },
-      { month: "Jul", renewable: 0, imported: 0, electricity: 0.26 },
-      { month: "Aug", renewable: 0, imported: 0, electricity: 3.43 },
-      { month: "Sep", renewable: 0, imported: 0, electricity: 5795.62 },
-      { month: "Oct", renewable: 0, imported: 0, electricity: 3.06 },
-      { month: "Nov", renewable: 0, imported: 0, electricity: 0 },
-      { month: "Dec", renewable: 0, imported: 0, electricity: 345.41 },
-      { month: "Jan", renewable: 0, imported: 0, electricity: 0 },
-      { month: "Feb", renewable: 0, imported: 0, electricity: 15.87 },
-      { month: "Mar", renewable: 0, imported: 0, electricity: 0 },
-    ],
-    scope3Data: [
-      { name: "Purchased Goods", value: 44952.301031, color: "#6366f1" },
-      { name: "Downstream Activities", value: 206.723297, color: "#ef4444" },
-      { name: "T&D Loss", value: 181.32087, color: "#10b981" },
-      { name: "Water Treatment", value: 165.871319, color: "#84cc16" },
-      { name: "Upstream Activities", value: 107.237389, color: "#8b5cf6" },
-      { name: "Water Supply", value: 93.849879, color: "#06b6d4" },
-      { name: "Air Travel", value: 85.780954, color: "#f97316" },
-      { name: "Hotel Stay", value: 20.4363, color: "#ec4899" },
-      { name: "Sea Travel", value: 11.8335, color: "#14b8a6" },
-      { name: "Food Consumption", value: 5.07625, color: "#78716c" },
-      { name: "Waste Disposal", value: 4.606446, color: "#f59e0b" },
-      { name: "Employee Commute", value: 3.713639, color: "#64748b" },
-      { name: "Land Travel", value: 1.231542, color: "#a3a3a3" },
-    ],
-  },
-} satisfies Record<string, YearDataset>;
-
-type YearKey = keyof typeof YEAR_DATASETS;
-
-const formatDelta = (delta: number, digits = 2) => {
-  const rounded = Math.abs(delta).toFixed(digits);
-  if (Number(rounded) === 0) {
-    return "0";
-  }
-  return `${delta >= 0 ? "+" : "-"}${rounded}`;
-};
-
-const buildContextPayload = (dataset: YearDataset) =>
-  JSON.stringify(
-    {
-      ...dataset.summary,
-      scope1_monthly: dataset.scope1Data,
-      scope2_monthly: dataset.scope2Data,
-      scope3_breakdown: dataset.scope3Data,
-    },
-    null,
-    2
-  );
 
 // Circular Progress Component
 const CircularProgress = ({
@@ -318,43 +217,135 @@ const ScopeCard = ({
 
 // Main Dashboard Component
 export default function ESGDashboard() {
-  const yearOptions = Object.keys(YEAR_DATASETS) as YearKey[];
-  const defaultYear = yearOptions[0];
-  const defaultBaseline = (yearOptions[1] ?? "") as YearKey | "";
-  const [selectedYear, setSelectedYear] = useState<YearKey>(defaultYear);
-  const [baselineYear, setBaselineYear] = useState<YearKey | "">(
-    defaultBaseline
-  );
+  const [fiscalYears, setFiscalYears] = useState<string[]>([]);
+  const [loadingData, setLoadingData] = useState(false);
+  const [dbData, setDbData] = useState<{
+    summary: any;
+    monthlyScope1: any[];
+    monthlyScope2: any[];
+    categories: any[];
+  } | null>(null);
+  
+  const defaultYear = "FY 2025-26";
+  const [selectedYear, setSelectedYear] = useState<string>(defaultYear);
+  const [baselineYear, setBaselineYear] = useState<string>("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(400);
   const [isDetached, setIsDetached] = useState(false);
-  const [contextData, setContextData] = useState<string>(() =>
-    buildContextPayload(YEAR_DATASETS[defaultYear])
-  );
+  const [contextData, setContextData] = useState<string>("");
 
+  // Fetch fiscal years on mount
   useEffect(() => {
-    setContextData(buildContextPayload(YEAR_DATASETS[selectedYear]));
+    fetchFiscalYears();
+  }, []);
+
+  const fetchFiscalYears = async () => {
+    try {
+      const res = await fetch("/api/emissions");
+      const data = await res.json();
+      if (data.fiscalYears && data.fiscalYears.length > 0) {
+        setFiscalYears(data.fiscalYears);
+        setSelectedYear(data.fiscalYears[0]);
+      }
+    } catch (error) {
+      console.error("Error fetching fiscal years:", error);
+    }
+  };
+
+  // Fetch emissions data when year changes
+  useEffect(() => {
+    fetchEmissionsData();
   }, [selectedYear]);
 
-  const currentYearDataset = YEAR_DATASETS[selectedYear];
-  const baselineDataset = baselineYear ? YEAR_DATASETS[baselineYear] : null;
+  const fetchEmissionsData = async () => {
+    setLoadingData(true);
+    try {
+      const res = await fetch(`/api/emissions/${selectedYear}`);
+      const data = await res.json();
+      if (!data.error) {
+        setDbData(data);
+        // Build context from API data
+        const contextPayload = {
+          current_view: "GHG Dashboard",
+          fiscal_year: data.summary?.fiscal_year || selectedYear,
+          total_emissions: data.summary?.total_emissions || 0,
+          scope_1: data.summary?.scope_1 || { value: 0, status: "" },
+          scope_2: data.summary?.scope_2 || { value: 0, status: "" },
+          scope_3: data.summary?.scope_3 || { value: 0, status: "" },
+          breakdown: data.summary?.breakdown || { scope_1_percentage: 0, scope_2_percentage: 0, scope_3_percentage: 0 },
+          top_emitters: data.summary?.top_emitters || [],
+          scope1_monthly: data.monthlyScope1 || [],
+          scope2_monthly: data.monthlyScope2 || [],
+          scope3_breakdown: data.categories?.map((c: any) => ({ name: c.category, value: c.value, color: c.color })) || [],
+        };
+        setContextData(JSON.stringify(contextPayload, null, 2));
+      }
+    } catch (error) {
+      console.error("Error fetching emissions data:", error);
+    }
+    setLoadingData(false);
+  };
 
-  const dashboardData: DashboardData = JSON.parse(contextData);
-  const { scope1Data, scope2Data, scope3Data } = currentYearDataset;
-  const baselineSummary = baselineDataset?.summary;
+  useEffect(() => {
+    if (dbData) {
+      const contextPayload = {
+        current_view: "GHG Dashboard",
+        fiscal_year: dbData.summary?.fiscal_year || selectedYear,
+        total_emissions: dbData.summary?.total_emissions || 0,
+        scope_1: dbData.summary?.scope_1 || { value: 0, status: "" },
+        scope_2: dbData.summary?.scope_2 || { value: 0, status: "" },
+        scope_3: dbData.summary?.scope_3 || { value: 0, status: "" },
+        breakdown: dbData.summary?.breakdown || { scope_1_percentage: 0, scope_2_percentage: 0, scope_3_percentage: 0 },
+        top_emitters: dbData.summary?.top_emitters || [],
+        scope1_monthly: dbData.monthlyScope1 || [],
+        scope2_monthly: dbData.monthlyScope2 || [],
+        scope3_breakdown: dbData.categories?.map((c: any) => ({ name: c.category, value: c.value, color: c.color })) || [],
+      };
+      setContextData(JSON.stringify(contextPayload, null, 2));
+    }
+  }, [selectedYear, dbData]);
+
+  // Use API data if available, otherwise fallback to static
+  const currentYearDataset = dbData ? {
+    summary: {
+      current_view: "GHG Dashboard",
+      fiscal_year: dbData.summary?.fiscal_year || selectedYear,
+      total_emissions: dbData.summary?.total_emissions || 0,
+      scope_1: dbData.summary?.scope_1 || { value: 0, status: "" },
+      scope_2: dbData.summary?.scope_2 || { value: 0, status: "" },
+      scope_3: dbData.summary?.scope_3 || { value: 0, status: "" },
+      breakdown: dbData.summary?.breakdown || { scope_1_percentage: 0, scope_2_percentage: 0, scope_3_percentage: 0 },
+      top_emitters: dbData.summary?.top_emitters || [],
+    },
+    scope1Data: dbData.monthlyScope1 || [],
+    scope2Data: dbData.monthlyScope2 || [],
+    scope3Data: (dbData.categories || []).map((c: any) => ({ name: c.category, value: c.value, color: c.color })),
+  } : null;
+
+  const dashboardData = dbData ? JSON.parse(contextData) : null;
+  const scope1Data = currentYearDataset?.scope1Data || [];
+  const scope2Data = currentYearDataset?.scope2Data || [];
+  const scope3Data = currentYearDataset?.scope3Data || [];
   const baselineLabel = baselineYear || null;
-  const scope1BaselineValue = baselineSummary?.scope_1.value;
-  const scope2BaselineValue = baselineSummary?.scope_2.value;
-  const scope3BaselineValue = baselineSummary?.scope_3.value;
-  const totalDelta = baselineSummary
-    ? dashboardData.total_emissions - baselineSummary.total_emissions
-    : null;
+  const scope1BaselineValue = undefined;
+  const scope2BaselineValue = undefined;
+  const scope3BaselineValue = undefined;
+  const totalDelta = undefined;
 
   // Calculate percentages based on total
-  const total = dashboardData.total_emissions || 1;
-  const scope1Percentage = (dashboardData.scope_1.value / total) * 100;
-  const scope2Percentage = (dashboardData.scope_2.value / total) * 100;
-  const scope3Percentage = (dashboardData.scope_3.value / total) * 100;
+  const total = dashboardData?.total_emissions || 1;
+  const scope1Percentage = ((dashboardData?.scope_1?.value || 0) / total) * 100;
+  const scope2Percentage = ((dashboardData?.scope_2?.value || 0) / total) * 100;
+  const scope3Percentage = ((dashboardData?.scope_3?.value || 0) / total) * 100;
+
+  // Show loading while fetching data
+  if (!dbData && fiscalYears.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -365,12 +356,12 @@ export default function ESGDashboard() {
       >
         <Header
           selectedYear={selectedYear}
-          setSelectedYear={(year) => setSelectedYear(year as YearKey)}
+          setSelectedYear={(year) => setSelectedYear(year)}
           baselineYear={baselineYear}
-          setBaselineYear={(year) => setBaselineYear(year as YearKey | "")}
+          setBaselineYear={(year) => setBaselineYear(year)}
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
-          yearOptions={yearOptions}
+          yearOptions={fiscalYears}
           activePage="dashboard"
         />
 
@@ -398,7 +389,7 @@ export default function ESGDashboard() {
                     <Factory className="w-6 h-6 text-white" />
                   </div>
                   <span className="text-xs bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full font-medium">
-                    FY {dashboardData.fiscal_year}
+                    FY {dashboardData?.fiscal_year || selectedYear}
                   </span>
                 </div>
                 <h3 className="text-emerald-100 text-sm font-medium mb-2">
@@ -406,7 +397,7 @@ export default function ESGDashboard() {
                 </h3>
                 <div className="flex items-baseline gap-2">
                   <span className="text-4xl font-bold tracking-tight">
-                    {dashboardData.total_emissions.toLocaleString('en-US')}
+                    {(dashboardData?.total_emissions || 0).toLocaleString('en-US')}
                   </span>
                   <span className="text-emerald-200 text-sm">TCO2Eq</span>
                 </div>
@@ -415,21 +406,13 @@ export default function ESGDashboard() {
                     <BarChart3 className="w-4 h-4" />
                     <span>Across all scopes</span>
                   </div>
-                  {baselineSummary && baselineLabel && totalDelta !== null && (
-                    <div className={`mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold ${totalDelta > 0 ? 'bg-red-500/20 text-red-100' : 'bg-emerald-500/20 text-emerald-100'}`}>
-                      <span>
-                        {totalDelta > 0 ? '↑' : '↓'} {Math.abs(totalDelta).toLocaleString()} TCO2Eq
-                      </span>
-                      <span className="opacity-70">vs {baselineLabel}</span>
-                    </div>
-                  )}
                 </div>
               </div>
 
               {/* Scope 1 Card */}
               <ScopeCard
                 title="Scope 1"
-                value={dashboardData.scope_1.value}
+                value={dashboardData?.scope_1?.value || 0}
                 unit="TCO2Eq"
                 color="#10b981"
                 percentage={scope1Percentage}
@@ -440,7 +423,7 @@ export default function ESGDashboard() {
               {/* Scope 2 Card */}
               <ScopeCard
                 title="Scope 2"
-                value={dashboardData.scope_2.value}
+                value={dashboardData?.scope_2?.value || 0}
                 unit="TCO2Eq"
                 color="#ec4899"
                 percentage={scope2Percentage}
@@ -451,7 +434,7 @@ export default function ESGDashboard() {
               {/* Scope 3 Card */}
               <ScopeCard
                 title="Scope 3"
-                value={dashboardData.scope_3.value}
+                value={dashboardData?.scope_3?.value || 0}
                 unit="TCO2Eq"
                 color="#3b82f6"
                 percentage={scope3Percentage}

@@ -70,3 +70,6 @@ _test_cairo.py
 
 #personal
 opencode.json
+.worktrees/
+docs/
+
