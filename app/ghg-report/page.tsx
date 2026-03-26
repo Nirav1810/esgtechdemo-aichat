@@ -752,6 +752,7 @@ export default function GHGReportPage() {
             onClose={() => setSidebarOpen(false)}
             contextData={contextData}
             pageType="ghg-report"
+            selectedYear={selectedYear}
             title="AI Companion"
             width={sidebarWidth}
             onWidthChange={setSidebarWidth}

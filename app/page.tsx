@@ -731,6 +731,7 @@ export default function ESGDashboard() {
             onClose={() => setSidebarOpen(false)}
             contextData={contextData}
             pageType="dashboard"
+            selectedYear={selectedYear}
             width={sidebarWidth}
             onWidthChange={setSidebarWidth}
             isDetached={isDetached}

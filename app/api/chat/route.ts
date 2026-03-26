@@ -497,6 +497,7 @@ export async function POST(req: Request) {
   let contextData = "";
   let pageType = "dashboard";
   let preferredModel = "";
+  let selectedYear = "FY 2025-26";
   let uploadedTextContext = "";
   let uploadedImageParts: ImagePart[] = [];
   let conversationHistory: { role: string; content: string }[] = [];
@@ -520,6 +521,10 @@ export async function POST(req: Request) {
         typeof formData.get("model") === "string"
           ? (formData.get("model") as string).trim()
           : "";
+      selectedYear =
+        typeof formData.get("selectedYear") === "string"
+          ? (formData.get("selectedYear") as string)
+          : "FY 2025-26";
 
       const historyStr = formData.get("history") as string;
       if (historyStr) {
@@ -567,6 +572,7 @@ export async function POST(req: Request) {
     pageType = typeof body.pageType === "string" ? body.pageType : "dashboard";
     preferredModel =
       typeof body.model === "string" ? body.model.trim() : "";
+    selectedYear = typeof body.selectedYear === "string" ? body.selectedYear : "FY 2025-26";
 
     if (body.history && Array.isArray(body.history)) {
       conversationHistory = body.history;
@@ -681,6 +687,7 @@ CRITICAL: DO NOT OUTPUT RAW JSON DATA OBJECTS for normal questions (e.g., summar
 
   const systemPrompt = pageType === "ghg-report" ? ghgReportPrompt : dashboardPrompt;
 
+  // Tool calling will fetch fresh data from MongoDB when needed
   const userMessage = `${combinedContext}User question: ${question}`;
 
   // Build messages array with conversation history
@@ -732,7 +739,8 @@ CRITICAL: DO NOT OUTPUT RAW JSON DATA OBJECTS for normal questions (e.g., summar
       : Array.from(new Set(defaultModelChain));
 
     for (const model of modelsToTry) {
-      const upstreamResponse = await fetch(CHUTES_URL, {
+      // First call - check if model wants to use tools
+      const initialResponse = await fetch(CHUTES_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -744,112 +752,193 @@ CRITICAL: DO NOT OUTPUT RAW JSON DATA OBJECTS for normal questions (e.g., summar
           tools: TOOL_DEFINITIONS,
           temperature: 0.7,
           max_tokens: MAX_TOKENS,
-          stream: true,
+          stream: false, // Non-streaming first to catch tool calls
         }),
       });
 
-      if (upstreamResponse.ok && upstreamResponse.body) {
-        console.log(`Using model: ${model}`);
+      if (!initialResponse.ok) {
+        const status = initialResponse.status;
+        const errorText = await initialResponse.text();
+        console.error(`Chutes upstream error: ${status}`, errorText);
+        
+        const shouldTryNextModel = status === 404 || status === 429 || status === 401 || status === 403 || status >= 500;
+        if (!shouldTryNextModel) break;
+        continue;
+      }
 
-        // Create a transform stream to filter out thinking content
+      const initialData = await initialResponse.json();
+      
+      // Check if model made tool calls
+      const toolCalls = initialData.choices?.[0]?.message?.tool_calls;
+      
+      if (toolCalls && toolCalls.length > 0) {
+        console.log("Model triggered tool calls:", toolCalls);
+        
+        // Execute all tool calls and collect results
+        const toolResults = [];
+        for (const toolCall of toolCalls) {
+          const toolName = toolCall.function?.name;
+          const toolArgs = toolCall.function?.arguments;
+          
+          try {
+            const args = JSON.parse(toolArgs || "{}");
+            const result = await executeTool(toolName, args);
+            toolResults.push({
+              tool_call_id: toolCall.id,
+              name: toolName,
+              content: JSON.stringify(result, null, 2)
+            });
+            console.log(`Tool ${toolName} executed successfully`);
+          } catch (err) {
+            console.error(`Tool ${toolName} failed:`, err);
+            toolResults.push({
+              tool_call_id: toolCall.id,
+              name: toolName,
+              content: JSON.stringify({ error: "Tool execution failed" })
+            });
+          }
+        }
+        
+        // Add tool results to messages
+        const messagesWithTools = [
+          ...messages,
+          {
+            role: "assistant",
+            content: initialData.choices?.[0]?.message?.content || null,
+            tool_calls: toolCalls
+          },
+          ...toolResults.map(result => ({
+            role: "tool" as const,
+            tool_call_id: result.tool_call_id,
+            name: result.name,
+            content: result.content
+          }))
+        ];
+        
+        // Second call - send tool results and get final response
+        const finalResponse = await fetch(CHUTES_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${API_KEY}`,
+          },
+          body: JSON.stringify({
+            model,
+            messages: messagesWithTools,
+            temperature: 0.7,
+            max_tokens: MAX_TOKENS,
+            stream: true,
+          }),
+        });
+        
+        if (finalResponse.ok && finalResponse.body) {
+          console.log(`Using model: ${model} with tool results`);
+          
+          const { readable, writable } = new TransformStream();
+          const writer = writable.getWriter();
+          const encoder = new TextEncoder();
+          
+          (async () => {
+            const reader = finalResponse.body?.getReader();
+            if (!reader) {
+              writer.close();
+              return;
+            }
+            
+            let buffer = "";
+            
+            try {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                  if (buffer) {
+                    const cleaned = filterThinkingContent(buffer);
+                    if (cleaned) writer.write(encoder.encode(cleaned));
+                  }
+                  break;
+                }
+                
+                const chunk = new TextDecoder().decode(value, { stream: true });
+                buffer += chunk;
+                
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || "";
+                
+                for (const line of lines) {
+                  if (line.startsWith('data: ')) {
+                    const data = line.slice(6);
+                    if (data === '[DONE]') {
+                      writer.write(encoder.encode('data: [DONE]\n\n'));
+                      continue;
+                    }
+                    try {
+                      const parsed = JSON.parse(data);
+                      const content = parsed.choices?.[0]?.delta?.content || "";
+                      if (content) {
+                        const cleaned = filterThinkingContent(content);
+                        if (cleaned) {
+                          const cleanedData = { ...parsed };
+                          cleanedData.choices = [{
+                            ...cleanedData.choices?.[0],
+                            delta: { ...cleanedData.choices?.[0]?.delta, content: cleaned }
+                          }];
+                          writer.write(encoder.encode(`data: ${JSON.stringify(cleanedData)}\n\n`));
+                        }
+                      } else {
+                        writer.write(encoder.encode(line + '\n\n'));
+                      }
+                    } catch {
+                      writer.write(encoder.encode(line + '\n\n'));
+                    }
+                  } else {
+                    writer.write(encoder.encode(line + '\n\n'));
+                  }
+                }
+              }
+            } catch (error) {
+              console.error("Stream processing error:", error);
+            } finally {
+              writer.close();
+            }
+          })();
+          
+          return new Response(readable, {
+            status: finalResponse.status,
+            headers: {
+              "Content-Type": "text/event-stream",
+              "X-Chutes-Model": model,
+            },
+          });
+        }
+      }
+      
+      // No tool calls - stream the normal response
+      if (initialData.choices?.[0]?.message?.content) {
+        // Return as streaming SSE
+        const content = filterThinkingContent(initialData.choices[0].message.content);
+        
         const { readable, writable } = new TransformStream();
         const writer = writable.getWriter();
         const encoder = new TextEncoder();
-
+        
         (async () => {
-          const reader = upstreamResponse.body?.getReader();
-          if (!reader) {
-            writer.close();
-            return;
+          const words = content.split(' ');
+          for (const word of words) {
+            const delta = { choices: [{ delta: { content: word + ' ' } }] };
+            writer.write(encoder.encode(`data: ${JSON.stringify(delta)}\n\n`));
+            await new Promise(r => setTimeout(r, 20));
           }
-
-          let buffer = "";
-
-          try {
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) {
-                // Process remaining buffer
-                if (buffer) {
-                  const cleaned = filterThinkingContent(buffer);
-                  if (cleaned) {
-                    writer.write(encoder.encode(cleaned));
-                  }
-                }
-                break;
-              }
-
-              const chunk = new TextDecoder().decode(value, { stream: true });
-              buffer += chunk;
-
-              // Process complete SSE lines
-              const lines = buffer.split('\n');
-              buffer = lines.pop() || "";
-
-              for (const line of lines) {
-                if (line.startsWith('data: ')) {
-                  const data = line.slice(6);
-                  if (data === '[DONE]') {
-                    writer.write(encoder.encode('data: [DONE]\n\n'));
-                    continue;
-                  }
-                  try {
-                    const parsed = JSON.parse(data);
-                    const content = parsed.choices?.[0]?.delta?.content || "";
-                    if (content) {
-                      const cleaned = filterThinkingContent(content);
-                      if (cleaned) {
-                        const cleanedData = { ...parsed };
-                        cleanedData.choices = [{
-                          ...cleanedData.choices?.[0],
-                          delta: { ...cleanedData.choices?.[0]?.delta, content: cleaned }
-                        }];
-                        writer.write(encoder.encode(`data: ${JSON.stringify(cleanedData)}\n\n`));
-                      }
-                    } else {
-                      writer.write(encoder.encode(line + '\n\n'));
-                    }
-                  } catch {
-                    // Not JSON, write as-is
-                    writer.write(encoder.encode(line + '\n\n'));
-                  }
-                } else {
-                  writer.write(encoder.encode(line + '\n\n'));
-                }
-              }
-            }
-          } catch (error) {
-            console.error("Stream processing error:", error);
-          } finally {
-            writer.close();
-          }
+          writer.write(encoder.encode('data: [DONE]\n\n'));
+          writer.close();
         })();
-
+        
         return new Response(readable, {
-          status: upstreamResponse.status,
+          status: 200,
           headers: {
             "Content-Type": "text/event-stream",
             "X-Chutes-Model": model,
           },
         });
-      }
-
-      const status = upstreamResponse.status || 500;
-      const errorText = await upstreamResponse.text();
-      console.error(`Chutes upstream error for ${model}:`, status, errorText);
-      lastStatus = status;
-      lastErrorText = errorText;
-
-      // Continue fallback on transient/model-specific errors.
-      const shouldTryNextModel =
-        status === 404 ||
-        status === 429 ||
-        status === 401 ||
-        status === 403 ||
-        status >= 500;
-
-      if (!shouldTryNextModel) {
-        break;
       }
     }
 

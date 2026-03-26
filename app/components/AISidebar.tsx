@@ -112,6 +112,7 @@ interface AISidebarProps {
   onClose: () => void;
   contextData: string;
   pageType: "dashboard" | "ghg-report";
+  selectedYear?: string;
   title?: string;
   subtitle?: string;
   width?: number;
@@ -319,6 +320,7 @@ export default function AISidebar({
   onClose,
   contextData,
   pageType,
+  selectedYear = "FY 2025-26",
   title = "AI Companion",
   subtitle = "Powered by Chutes AI",
   width: initialWidth,
@@ -797,6 +799,7 @@ export default function AISidebar({
       formData.append("question", question);
       formData.append("contextData", contextData);
       formData.append("pageType", pageType);
+      formData.append("selectedYear", selectedYear);
       formData.append("model", selectedAskModel);
       formData.append("history", JSON.stringify(historyForApi));
       files.forEach((file) => {
@@ -817,6 +820,7 @@ export default function AISidebar({
           question,
           contextData,
           pageType,
+          selectedYear,
           model: selectedAskModel,
           history: historyForApi,
         }),
