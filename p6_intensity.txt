@@ -1,0 +1,43 @@
+R12_D: VAL=Parameter
+R12_E: VAL=Units
+R12_F: FORMULA="FY ("&RIGHT('General Disclosures'!F19,4)&"-"&RIGHT('General Disclosures'!H19,2)&")"
+R12_G: FORMULA="PY ("&RIGHT('General Disclosures'!F20,4)&"-"&RIGHT('General Disclosures'!H20,2)&")"
+R24_D: VAL=Energy intensity per rupee of turnover (Total energy consumed / Revenue from operations)
+R24_E: FORMULA=IF(E14="","",E14&" / Rs.")
+R24_F: FORMULA=IF(F23="","",IFERROR(ROUND(F23/F11,10),""))
+R24_G: FORMULA=IF(G23="","",IFERROR(ROUND(G23/G11,10),""))
+R25_D: VAL=Energy intensity per rupee of turnover adjusted for Purchasing Power Parity (PPP)
+(Total energy con
+R25_E: FORMULA=IF(E14="","",E14&" / Rs.")
+R26_D: VAL=Energy intensity in terms of physical Output
+R26_E: FORMULA=IF(E14="","",E14)
+R27_D: VAL=Energy intensity (optional) – the relevant metric may be selected by the entity
+R28_D: VAL=Note: Indicate if any independent assessment/ evaluation/assurance has been carried out by an extern
+R41_D: VAL=Total volume of water consumption (in kilolitres)
+R42_D: VAL=Water intensity per rupee of turnover (Total water consumption / Revenue from operations)
+R42_E: FORMULA=IF(E41="","",IFERROR(ROUND(E41/F11,10),""))
+R42_F: FORMULA=IF(F41="","",IFERROR(ROUND(F41/G11,10),""))
+R43_D: VAL=Water intensity per rupee of turnover adjusted for Purchasing Power Parity (PPP)
+(Total water consu
+R44_D: VAL=Water intensity in terms of physical output
+R45_D: VAL=Water intensity (optional) – the relevant metric may be selected by the entity
+R87_D: VAL=Total Scope 2 emissions (Break-up of the GHG into CO2, CH4, N2O, HFCs, PFCs, SF6, NF3, if available)
+R87_E: FORMULA=IF(E86="","",E86)
+R88_D: VAL=Total Scope 1 and Scope 2 emission intensity per rupee of turnover
+(Total Scope 1 and Scope 2 GHG e
+R88_E: FORMULA=IF(E86="","",E86&" / Rs.")
+R88_F: FORMULA=IF(OR(F86="",F87=""),"",IFERROR(ROUND(SUM(F86,F87)/F11,10),""))
+R88_G: FORMULA=IF(OR(G86="",G87=""),"",IFERROR(ROUND(SUM(G86,G87)/G11,10),""))
+R89_D: VAL=Total Scope 1 and Scope 2 emission intensity per rupee of turnover adjusted for Purchasing Power Par
+R89_E: FORMULA=IF(E86="","",E86&" / Rs.")
+R90_D: VAL=Total Scope 1 and Scope 2 emission intensity in terms of physical output
+R90_E: FORMULA=IF(E86="","",E86)
+R91_D: VAL=Total Scope 1 and Scope 2 emission intensity (optional) – the relevant metric may be selected by the
+R108_D: VAL=Waste intensity per rupee of turnover
+(Total waste generated / Revenue from operations)
+R108_E: FORMULA=IF(E107="","",IFERROR(ROUND(E107/F11,10),""))
+R108_F: FORMULA=IF(F107="","",IFERROR(ROUND(F107/G11,10),""))
+R109_D: VAL=Waste intensity per rupee of turnover adjusted for Purchasing Power Parity (PPP)
+(Total waste gener
+R110_D: VAL=Waste intensity in terms of physical output
+R111_D: VAL=Waste intensity (optional) – the relevant metric may be selected by the entity

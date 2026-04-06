@@ -1,0 +1,80 @@
+% of your plants and offices that were assessed 
+(by entity or statutory authorities or third parties)
+Child labour 100%
+Forced/involuntary labour 100%
+Sexual harassment 100%
+Discrimination at workplace 100%
+Wages 100%10. Assessments of the year
+ All our locations on monthly basis submit Compliance Certificate which is documented in Legatix and compiled and 
+presented to the board every quarter.
+11. Provide details of any corrective actions taken or underway to address significant risks / concerns arising from 
+the assessments at Question 10 above. 
+ There were no significant risks / concerns arising from the above assessments.
+1. Details of total energy consumption (in Joules or multiples) and energy intensity, in the following format: 
+ParameterUnit of 
+measurementFY2025
+Current financial Year FY2024
+Previous financial Year
+From renewable sources
+Total electricity consumption (A) GJ 114812 51268
+Total fuel consumption (B) GJ 860147 454852
+Energy consumption through other sources (C) GJ 0 0
+Total energy consumed from renewable sources 
+(A+B+C)GJ 974959 506120
+From non-renewable sources
+Total electricity consumption (D) GJ 366909 128000
+Total fuel consumption (E) GJ 526691 657562
+Energy consumption through other sources (F) GJ 0 0
+Total energy consumed from non-renewable sources 
+(D+E+F)GJ 893600 785562
+Total energy consumed (A+B+C+D+E+F) GJ 1868559 1291682
+Energy intensity per rupee of turnover  
+(Total energy consumed / Revenue from operations)GJ/Cr. Rs. 106.06 124.74Businesses should respect and make efforts to protect and restore the environmentPrinciple
+Essential Indicators
+Note: We are consistently upgrading our data capturing mechanisms in order to make reliable and transparent Sustainability 
+disclosures. Owing to this, we have revisited some of our previous recorded performance numbers to present more accurate 
+position. Accordingly, we have revised the data points in water withdrawal for FY24 to reflect these modifications and accurately 
+capture our conservation efforts. The figures for FY24 appearing in this report may be considered the most updated and accurate 
+representation for the said year for TCPL India operation boundary.
+29
+ Note: Indicate if any independent assessment/ evaluation/assurance has been carried out by an external agency? (Y/N) If 
+yes, name of the external agency
+ Yes. The energy consumption data and energy intensity data are audited and verified by British Standards Institution (BSI) 
+as part of ‘Reasonable Assurance’ for the BRSR.
+2. Does the entity have any sites / facilities identified as designated consumers (DCs) under the Performance, Achieve 
+and Trade (PAT) Scheme of the Government of India? (Y/N) If yes, disclose whether targets set under the PAT 
+scheme have been achieved. In case targets have not been achieved, provide the remedial action taken, if any.
+ TCPL operates in a sector that does not fall under the classification of designated consumers (DCs), and as such, none of its 
+sites are included in the Performance, Achieve, and Trade (PAT) scheme.ParameterUnit of 
+measurementFY2025
+Current financial Year FY2024
+Previous financial Year
+Energy intensity per rupee of turnover adjusted for 
+Purchasing Power Parity (PPP) (Total energy consumed / 
+Revenue from operations adjusted for PPP)GJ/million USD 219.12 130.05
+Energy intensity in terms of physical output - Production GJ/MT 0.84 5.69
+Energy intensity (optional) – the relevant metric may be 
+selected by the entity- - -
+3. Provide details of the following disclosures related to water, in the following format:
+ParameterUnit of 
+measurementFY2025  
+Current financial Year FY2024 
+Previous financial Year
+Water withdrawal by source (in kiloliters)
+(i) Surface water kL 2847221 2329406
+(ii) Groundwater kL 320917 173115
+(iii) Third party water (Municipal water supplies) kL 847479 178252
+(iv) Seawater / desalinated water kL 0 0
+(v) Others kL 0 0
+Total volume of water withdrawal (i + ii + iii + iv + v) kL 4015617 2680773
+Total volume of water consumption kL 6532755 4730690
+Water intensity per rupee of turnover kL/Cr. Rs. 370.79 456.85
+Water intensity per rupee of turnover adjusted for 
+Purchasing Power Parity (PPP) kL/million USD 766.06 476.29
+Water intensity in terms of physical output kL/MT 2.95 20.83
+Water intensity (optional) – the relevant metric may be 
+selected by the entity- - -
+ Note: Indicate if any independent assessment/ evaluation/assurance has been carried out by an external agency? (Y/N) If 
+yes, name of the external agency
+ Yes. BSI Group India Pvt. Ltd has conducted an independent assurance.
+30

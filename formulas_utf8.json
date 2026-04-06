@@ -1,0 +1,201 @@
+[
+  {
+    "row_index": 10,
+    "cells": [
+      {
+        "col": "F",
+        "val": "=\"FY (\"&RIGHT('General Disclosures'!F19,4)&\"-\"&RIGHT('General Disclosures'!H19,2)&\")\""
+      },
+      {
+        "col": "G",
+        "val": "=\"PY (\"&RIGHT('General Disclosures'!F20,4)&\"-\"&RIGHT('General Disclosures'!H20,2)&\")\""
+      }
+    ]
+  },
+  {
+    "row_index": 12,
+    "cells": [
+      {
+        "col": "F",
+        "val": "=\"FY (\"&RIGHT('General Disclosures'!F19,4)&\"-\"&RIGHT('General Disclosures'!H19,2)&\")\""
+      },
+      {
+        "col": "G",
+        "val": "=\"PY (\"&RIGHT('General Disclosures'!F20,4)&\"-\"&RIGHT('General Disclosures'!H20,2)&\")\""
+      }
+    ]
+  },
+  {
+    "row_index": 15,
+    "cells": [
+      {
+        "col": "E",
+        "val": "=IF(E14=\"\",\"\",E14)"
+      }
+    ]
+  },
+  {
+    "row_index": 16,
+    "cells": [
+      {
+        "col": "E",
+        "val": "=IF(E14=\"\",\"\",E14)"
+      },
+      {
+        "col": "F",
+        "val": "=IF(COUNT(F14:F15)>0,+SUM('Energy consumed from renewable'!G11:G498),\"\")"
+      },
+      {
+        "col": "G",
+        "val": "=IF(COUNT(G14:G15)>0,+SUM('Energy consumed from renewable'!H11:H498),\"\")"
+      }
+    ]
+  },
+  {
+    "row_index": 17,
+    "cells": [
+      {
+        "col": "E",
+        "val": "=IF(E14=\"\",\"\",E14)"
+      },
+      {
+        "col": "F",
+        "val": "=IF(COUNT(F14:F16)>0,SUM(F14:F16),\"\")"
+      },
+      {
+        "col": "G",
+        "val": "=IF(COUNT(G14:G16)>0,SUM(G14:G16),\"\")"
+      }
+    ]
+  },
+  {
+    "row_index": 19,
+    "cells": [
+      {
+        "col": "E",
+        "val": "=IF(E14=\"\",\"\",E14)"
+      }
+    ]
+  },
+  {
+    "row_index": 20,
+    "cells": [
+      {
+        "col": "E",
+        "val": "=IF(E14=\"\",\"\",E14)"
+      }
+    ]
+  },
+  {
+    "row_index": 21,
+    "cells": [
+      {
+        "col": "E",
+        "val": "=IF(E14=\"\",\"\",E14)"
+      },
+      {
+        "col": "F",
+        "val": "=IF(COUNT(F19:F20)>0,+SUM('EnergyConsumed from NR'!G11:G498),\"\")"
+      },
+      {
+        "col": "G",
+        "val": "=IF(COUNT(G19:G20)>0,+SUM('EnergyConsumed from NR'!H11:H498),\"\")"
+      }
+    ]
+  },
+  {
+    "row_index": 22,
+    "cells": [
+      {
+        "col": "E",
+        "val": "=IF(E14=\"\",\"\",E14)"
+      },
+      {
+        "col": "F",
+        "val": "=IF(COUNT(F19:F21)>0,SUM(F19:F21),\"\")"
+      },
+      {
+        "col": "G",
+        "val": "=IF(COUNT(G19:G21)>0,SUM(G19:G21),\"\")"
+      }
+    ]
+  },
+  {
+    "row_index": 23,
+    "cells": [
+      {
+        "col": "E",
+        "val": "=IF(E14=\"\",\"\",E14)"
+      },
+      {
+        "col": "F",
+        "val": "=IF(COUNT(F17,F22)>0,SUM(F17,F22),\"\")"
+      },
+      {
+        "col": "G",
+        "val": "=IF(COUNT(G17,G22)>0,SUM(G17,G22),\"\")"
+      }
+    ]
+  },
+  {
+    "row_index": 24,
+    "cells": [
+      {
+        "col": "E",
+        "val": "=IF(E14=\"\",\"\",E14&\" / Rs.\")"
+      },
+      {
+        "col": "F",
+        "val": "=IF(F23=\"\",\"\",IFERROR(ROUND(F23/F11,10),\"\"))"
+      },
+      {
+        "col": "G",
+        "val": "=IF(G23=\"\",\"\",IFERROR(ROUND(G23/G11,10),\"\"))"
+      }
+    ]
+  },
+  {
+    "row_index": 25,
+    "cells": [
+      {
+        "col": "E",
+        "val": "=IF(E14=\"\",\"\",E14&\" / Rs.\")"
+      }
+    ]
+  },
+  {
+    "row_index": 26,
+    "cells": [
+      {
+        "col": "E",
+        "val": "=IF(E14=\"\",\"\",E14)"
+      }
+    ]
+  },
+  {
+    "row_index": 33,
+    "cells": [
+      {
+        "col": "E",
+        "val": "=\"FY (\"&RIGHT('General Disclosures'!F19,4)&\"-\"&RIGHT('General Disclosures'!H19,2)&\")\""
+      },
+      {
+        "col": "F",
+        "val": "=\"PY (\"&RIGHT('General Disclosures'!F20,4)&\"-\"&RIGHT('General Disclosures'!H20,2)&\")\""
+      }
+    ]
+  },
+  {
+    "row_index": 40,
+    "cells": [
+      {
+        "col": "E",
+        "val": "=IF(COUNT(E35:E39)>0,SUM(E35:E39),\"\")"
+      },
+      {
+        "col": "F",
+        "val": "=IF(COUNT(F35:F39)>0,SUM(F35:F39),\"\")"
+      }
+    ]
+  }
+]

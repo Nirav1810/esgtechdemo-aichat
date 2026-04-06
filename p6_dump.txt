@@ -1,0 +1,227 @@
+R6_D: VAL=PRINCIPLE 6: Businesses should respect and make efforts to protect and restore t
+R7_D: VAL=Essential Indicators
+R8_D: VAL=1. Details of total energy consumption (in Joules or multiples) and energy inten
+R9_D: VAL=Whether total energy consumption and energy intensity is applicable to the compa
+R10_D: VAL=Revenue from operations (in Rs.)
+R10_F: FORMULA="FY ("&RIGHT('General Disclosures'!F19,4)&"-"&RIGHT('General Disclosures'!H19,2)&")"
+R10_G: FORMULA="PY ("&RIGHT('General Disclosures'!F20,4)&"-"&RIGHT('General Disclosures'!H20,2)&")"
+R12_D: VAL=Parameter
+R12_E: VAL=Units
+R12_F: FORMULA="FY ("&RIGHT('General Disclosures'!F19,4)&"-"&RIGHT('General Disclosures'!H19,2)&")"
+R12_G: FORMULA="PY ("&RIGHT('General Disclosures'!F20,4)&"-"&RIGHT('General Disclosures'!H20,2)&")"
+R13_D: VAL=From renewable sources
+R14_D: VAL=Total electricity consumption (A)
+R15_D: VAL=Total fuel consumption (B)
+R15_E: FORMULA=IF(E14="","",E14)
+R16_D: VAL=Energy consumption through other sources (C)
+R16_E: FORMULA=IF(E14="","",E14)
+R16_F: FORMULA=IF(COUNT(F14:F15)>0,+SUM('Energy consumed from renewable'!G11:G498),"")
+R16_G: FORMULA=IF(COUNT(G14:G15)>0,+SUM('Energy consumed from renewable'!H11:H498),"")
+R17_D: VAL=Total energy consumed from renewable sources (A+B+C)
+R17_E: FORMULA=IF(E14="","",E14)
+R17_F: FORMULA=IF(COUNT(F14:F16)>0,SUM(F14:F16),"")
+R17_G: FORMULA=IF(COUNT(G14:G16)>0,SUM(G14:G16),"")
+R18_D: VAL=From non-renewable sources
+R19_D: VAL=Total electricity consumption (D)
+R19_E: FORMULA=IF(E14="","",E14)
+R20_D: VAL=Total fuel consumption (E)
+R20_E: FORMULA=IF(E14="","",E14)
+R21_D: VAL=Energy consumption through other sources (F)
+R21_E: FORMULA=IF(E14="","",E14)
+R21_F: FORMULA=IF(COUNT(F19:F20)>0,+SUM('EnergyConsumed from NR'!G11:G498),"")
+R21_G: FORMULA=IF(COUNT(G19:G20)>0,+SUM('EnergyConsumed from NR'!H11:H498),"")
+R22_D: VAL=Total energy consumed from non-renewable sources (D+E+F)
+R22_E: FORMULA=IF(E14="","",E14)
+R22_F: FORMULA=IF(COUNT(F19:F21)>0,SUM(F19:F21),"")
+R22_G: FORMULA=IF(COUNT(G19:G21)>0,SUM(G19:G21),"")
+R23_D: VAL=Total energy consumed (A+B+C+D+E+F)
+R23_E: FORMULA=IF(E14="","",E14)
+R23_F: FORMULA=IF(COUNT(F17,F22)>0,SUM(F17,F22),"")
+R23_G: FORMULA=IF(COUNT(G17,G22)>0,SUM(G17,G22),"")
+R24_D: VAL=Energy intensity per rupee of turnover (Total energy consumed / Revenue from ope
+R24_E: FORMULA=IF(E14="","",E14&" / Rs.")
+R24_F: FORMULA=IF(F23="","",IFERROR(ROUND(F23/F11,10),""))
+R24_G: FORMULA=IF(G23="","",IFERROR(ROUND(G23/G11,10),""))
+R25_D: VAL=Energy intensity per rupee of turnover adjusted for Purchasing Power Parity (PPP
+R25_E: FORMULA=IF(E14="","",E14&" / Rs.")
+R26_D: VAL=Energy intensity in terms of physical Output
+R26_E: FORMULA=IF(E14="","",E14)
+R27_D: VAL=Energy intensity (optional) – the relevant metric may be selected by the entity
+R28_D: VAL=Note: Indicate if any independent assessment/ evaluation/assurance has been carr
+R29_D: VAL=If yes, name of the external agency.
+R30_D: VAL=2. Does the entity have any sites / facilities identified as designated consumer
+R31_D: VAL=If yes, disclose whether targets set under the PAT scheme have been achieved. In
+R32_D: VAL=3. Provide details of the following disclosures related to water, in the followi
+R33_D: VAL=Parameter
+R33_E: FORMULA="FY ("&RIGHT('General Disclosures'!F19,4)&"-"&RIGHT('General Disclosures'!H19,2)&")"
+R33_F: FORMULA="PY ("&RIGHT('General Disclosures'!F20,4)&"-"&RIGHT('General Disclosures'!H20,2)&")"
+R34_D: VAL=Water withdrawal by source (in kilolitres)
+R35_D: VAL=(i) Surface water
+R36_D: VAL=(ii) Groundwater
+R37_D: VAL=(iii) Third party water
+R38_D: VAL=(iv) Seawater / desalinated water
+R39_D: VAL=(v) Others
+R40_D: VAL=Total volume of water withdrawal (in kilolitres) (i + ii + iii + iv + v)
+R40_E: FORMULA=IF(COUNT(E35:E39)>0,SUM(E35:E39),"")
+R40_F: FORMULA=IF(COUNT(F35:F39)>0,SUM(F35:F39),"")
+R41_D: VAL=Total volume of water consumption (in kilolitres)
+R42_D: VAL=Water intensity per rupee of turnover (Total water consumption / Revenue from op
+R42_E: FORMULA=IF(E41="","",IFERROR(ROUND(E41/F11,10),""))
+R42_F: FORMULA=IF(F41="","",IFERROR(ROUND(F41/G11,10),""))
+R43_D: VAL=Water intensity per rupee of turnover adjusted for Purchasing Power Parity (PPP)
+R44_D: VAL=Water intensity in terms of physical output
+R45_D: VAL=Water intensity (optional) – the relevant metric may be selected by the entity
+R46_D: VAL=Note: Indicate if any independent assessment/ evaluation/assurance has been carr
+R47_D: VAL=If yes, name of the external agency.
+R48_D: VAL=4. Provide the following details related to water discharged:
+R49_D: VAL=Parameter
+R49_E: FORMULA="FY ("&RIGHT('General Disclosures'!F19,4)&"-"&RIGHT('General Disclosures'!H19,2)&")"
+R49_F: FORMULA="PY ("&RIGHT('General Disclosures'!F20,4)&"-"&RIGHT('General Disclosures'!H20,2)&")"
+R50_D: VAL=Water discharge by destination and level of treatment (in kilolitres)
+R51_D: VAL=(i) To Surface water
+R51_E: FORMULA=IF(COUNT(E52:E53)>0,SUM(E52:E53),"")
+R51_F: FORMULA=IF(COUNT(F52:F53)>0,SUM(F52:F53),"")
+R52_D: VAL=No treatment
+R53_D: VAL=With treatment – please specify level of treatment
+R54_D: VAL=(ii) To Groundwater
+R54_E: FORMULA=IF(COUNT(E55:E56)>0,SUM(E55:E56),"")
+R54_F: FORMULA=IF(COUNT(F55:F56)>0,SUM(F55:F56),"")
+R55_D: VAL=No treatment
+R56_D: VAL=With treatment – please specify level of treatment
+R57_D: VAL=(iii) To Seawater
+R57_E: FORMULA=IF(COUNT(E58:E59)>0,SUM(E58:E59),"")
+R57_F: FORMULA=IF(COUNT(F58:F59)>0,SUM(F58:F59),"")
+R58_D: VAL=No treatment
+R59_D: VAL=With treatment – please specify level of treatment
+R60_D: VAL=(iv) Sent to third-parties
+R60_E: FORMULA=IF(COUNT(E61:E62)>0,SUM(E61:E62),"")
+R60_F: FORMULA=IF(COUNT(F61:F62)>0,SUM(F61:F62),"")
+R61_D: VAL=No treatment
+R62_D: VAL=With treatment – please specify level of treatment
+R63_D: VAL=(v) Others
+R63_E: FORMULA=IF(COUNT(E64:E65)>0,SUM(E64:E65),"")
+R63_F: FORMULA=IF(COUNT(F64:F65)>0,SUM(F64:F65),"")
+R64_D: VAL=No treatment
+R65_D: VAL=With treatment – please specify level of treatment
+R66_D: VAL=Total water discharged (in kilolitres)
+R66_E: FORMULA=+IF(COUNT(E51,E54,E57,E60,E63)>0,SUM(E51,E54,E57,E60,E63),"")
+R66_F: FORMULA=+IF(COUNT(F51,F54,F57,F60,F63)>0,SUM(F51,F54,F57,F60,F63),"")
+R67_D: VAL=Note: Indicate if any independent assessment/ evaluation/assurance has been carr
+R68_D: VAL=If yes, name of the external agency.
+R69_D: VAL=5. Has the entity implemented a mechanism for Zero Liquid Discharge?
+R70_D: VAL=If yes, provide details of its coverage and implementation.
+R71_D: VAL=6. Please provide details of air emissions (other than GHG emissions) by the ent
+R72_D: VAL=Whether air emissions (other than GHG emissions) by the entity is applicable to 
+R73_D: VAL=Parameter
+R73_E: VAL=Please specify unit
+R73_F: FORMULA="FY ("&RIGHT('General Disclosures'!F19,4)&"-"&RIGHT('General Disclosures'!H19,2)&")"
+R73_G: FORMULA="PY ("&RIGHT('General Disclosures'!F20,4)&"-"&RIGHT('General Disclosures'!H20,2)&")"
+R74_D: VAL=NOx
+R75_D: VAL=SOx
+R76_D: VAL=Particulate matter (PM)
+R77_D: VAL=Persistent organic pollutants (POP)
+R78_D: VAL=Volatile organic compounds (VOC)
+R79_D: VAL=Hazardous air pollutants (HAP)
+R80_D: VAL=Others – please specify
+R81_D: VAL=Note: Indicate if any independent assessment/ evaluation/assurance has been carr
+R82_D: VAL=If yes, name of the external agency.
+R83_D: VAL=7. Provide details of greenhouse gas emissions (Scope 1 and Scope 2 emissions) &
+R84_D: VAL=Whether greenhouse gas emissions (Scope 1 and Scope 2 emissions) & its intensity
+R85_D: VAL=Parameter
+R85_E: VAL=Unit
+R85_F: FORMULA="FY ("&RIGHT('General Disclosures'!F19,4)&"-"&RIGHT('General Disclosures'!H19,2)&")"
+R85_G: FORMULA="PY ("&RIGHT('General Disclosures'!F20,4)&"-"&RIGHT('General Disclosures'!H20,2)&")"
+R86_D: VAL=Total Scope 1 emissions (Break-up of the GHG into CO2, CH4, N2O, HFCs, PFCs, SF6
+R87_D: VAL=Total Scope 2 emissions (Break-up of the GHG into CO2, CH4, N2O, HFCs, PFCs, SF6
+R87_E: FORMULA=IF(E86="","",E86)
+R88_D: VAL=Total Scope 1 and Scope 2 emission intensity per rupee of turnover
+(Total Scope
+R88_E: FORMULA=IF(E86="","",E86&" / Rs.")
+R88_F: FORMULA=IF(OR(F86="",F87=""),"",IFERROR(ROUND(SUM(F86,F87)/F11,10),""))
+R88_G: FORMULA=IF(OR(G86="",G87=""),"",IFERROR(ROUND(SUM(G86,G87)/G11,10),""))
+R89_D: VAL=Total Scope 1 and Scope 2 emission intensity per rupee of turnover adjusted for 
+R89_E: FORMULA=IF(E86="","",E86&" / Rs.")
+R90_D: VAL=Total Scope 1 and Scope 2 emission intensity in terms of physical output
+R90_E: FORMULA=IF(E86="","",E86)
+R91_D: VAL=Total Scope 1 and Scope 2 emission intensity (optional) – the relevant metric ma
+R92_D: VAL=Note: Indicate if any independent assessment/ evaluation/assurance has been carr
+R93_D: VAL=If yes, name of the external agency.
+R94_D: VAL=8. Does the entity have any project related to reducing Green House Gas emission
+R95_D: VAL=If Yes, then provide details.
+R96_D: VAL=9. Provide details related to waste management by the entity, in the following f
+R97_D: VAL=Parameter
+R97_E: FORMULA="FY ("&RIGHT('General Disclosures'!F19,4)&"-"&RIGHT('General Disclosures'!H19,2)&")"
+R97_F: FORMULA="PY ("&RIGHT('General Disclosures'!F20,4)&"-"&RIGHT('General Disclosures'!H20,2)&")"
+R98_D: VAL=Total Waste generated (in metric tonnes)
+R99_D: VAL=Plastic waste (A)
+R100_D: VAL=E-waste (B)
+R101_D: VAL=Bio-medical waste (C)
+R102_D: VAL=Construction and demolition waste (D)
+R103_D: VAL=Battery waste (E)
+R104_D: VAL=Radioactive waste (F)
+R105_D: VAL=Other Hazardous waste. Please specify, if any. (G)
+R106_D: VAL=Other Non-hazardous waste generated (H). Please specify, if any. (Break-up by co
+R107_D: VAL=Total (A+B + C + D + E + F + G + H)
+R107_E: FORMULA=IF(COUNT(E99:E106)>0,SUM(E99:E106),"")
+R107_F: FORMULA=IF(COUNT(F99:F106)>0,SUM(F99:F106),"")
+R108_D: VAL=Waste intensity per rupee of turnover
+(Total waste generated / Revenue from ope
+R108_E: FORMULA=IF(E107="","",IFERROR(ROUND(E107/F11,10),""))
+R108_F: FORMULA=IF(F107="","",IFERROR(ROUND(F107/G11,10),""))
+R109_D: VAL=Waste intensity per rupee of turnover adjusted for Purchasing Power Parity (PPP)
+R110_D: VAL=Waste intensity in terms of physical output
+R111_D: VAL=Waste intensity (optional) – the relevant metric may be selected by the entity
+R112_D: VAL=For each category of waste generated, total waste recovered through recycling, r
+R113_D: VAL=Category of waste
+R114_D: VAL=(i) Recycled
+R115_D: VAL=(ii) Re-used
+R116_D: VAL=(iii) Other recovery operations
+R117_D: VAL=Total
+R117_E: FORMULA=IF(COUNT(E114:E116)>0,SUM(E114:E116),"")
+R117_F: FORMULA=IF(COUNT(F114:F116)>0,SUM(F114:F116),"")
+R118_D: VAL=For each category of waste generated, total waste disposed by nature of disposal
+R119_D: VAL=Category of waste
+R120_D: VAL=(i) Incineration
+R121_D: VAL=(ii) Landfilling
+R122_D: VAL=(iii) Other disposal operations
+R123_D: VAL=Total
+R123_E: FORMULA=IF(COUNT(E120:E122)>0,SUM(E120:E122),"")
+R123_F: FORMULA=IF(COUNT(F120:F122)>0,SUM(F120:F122),"")
+R124_D: VAL=Note: Indicate if any independent assessment/ evaluation/assurance has been carr
+R125_D: VAL=If yes, name of the external agency.
+R126_D: VAL=10. Briefly describe the waste management practices adopted in your establishmen
+R127_D: VAL=11. If the entity has operations/offices in/around ecologically sensitive areas 
+R127_G: VAL=Add Details
+R128_D: VAL=12. Details of environmental impact assessments of projects undertaken by the en
+R128_G: VAL=Add Details
+R129_D: VAL=13. Is the entity compliant with the applicable environmental law/ regulations/ 
+R130_D: VAL=If not, provide details of all such non-compliances, in the following format:
+R131_D: VAL=Leadership Indicators
+R132_D: VAL=1. Water withdrawal, consumption and discharge in areas of water stress (in kilo
+R133_D: VAL=For each facility / plant located in areas of water stress, provide the followin
+R133_G: VAL=Add Details
+R134_D: VAL=Note: Indicate if any independent assessment/ evaluation/assurance has been carr
+R135_D: VAL=If yes, name of the external agency.
+R136_D: VAL=2. Please provide details of total Scope 3 emissions & its intensity, in the fol
+R137_D: VAL=Whether total Scope 3 emissions & its intensity is applicable to the company?
+R138_D: VAL=Parameter
+R138_E: VAL=Unit
+R138_F: FORMULA="FY ("&RIGHT('General Disclosures'!F19,4)&"-"&RIGHT('General Disclosures'!H19,2)&")"
+R138_G: FORMULA="PY ("&RIGHT('General Disclosures'!F20,4)&"-"&RIGHT('General Disclosures'!H20,2)&")"
+R139_D: VAL=Total Scope 3 emissions (Break-up of the GHG into CO2, CH4, N2O, HFCs, PFCs, SF6
+R140_D: VAL=Total Scope 3 emissions per rupee of turnover
+R140_E: FORMULA=IF(E139="","",E139&" / Rs.")
+R141_D: VAL=Total Scope 3 emission intensity (optional) – the relevant metric may be selecte
+R142_D: VAL=Note: Indicate if any independent assessment/ evaluation/assurance has been carr
+R143_D: VAL=If yes, name of the external agency.
+R144_D: VAL=3. With respect to the ecologically sensitive areas reported at Question 10 of E
+R145_D: VAL=4. If the entity has undertaken any specific initiatives or used innovative tech
+R145_G: VAL=Add Details
+R146_D: VAL=5. Does the entity have a business continuity and disaster management plan?
+R147_D: VAL=Details of entity at which business continuity and disaster management plan is p
+R148_D: VAL=6. Disclose any significant adverse impact to the environment, arising from the 
+R149_D: VAL=7. Percentage of value chain partners (by value of business done with such partn
+R150_D: VAL=8. How many Green Credits have been generated or procured:
+R151_D: VAL=a. By the listed entity
+R152_D: VAL=b. By the top ten (in terms of value of purchases and sales, respectively) value
+R153_D: VAL=Notes

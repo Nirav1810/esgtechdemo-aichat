@@ -81,3 +81,21 @@ body {
 .prose table tr:hover {
   background-color: #f1f5f9;
 }
+
+/* ── Number input: hide spinners & block scroll-wheel value changes ── */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/* Prevent accidental value change when scrolling over number inputs */
+input[type='number'],
+input[type='text'][inputmode='decimal'] {
+  scroll-snap-align: none;
+}
+

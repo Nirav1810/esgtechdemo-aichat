@@ -21,6 +21,7 @@ import {
   Factory,
   RefreshCw,
 } from "lucide-react";
+import Link from "next/link";
 import Header from "./components/Header";
 import AISidebar from "./components/AISidebar";
 import DetachedAIChat from "./components/DetachedAIChat";
@@ -369,11 +370,21 @@ export default function ESGDashboard() {
         <div className="flex-1 overflow-auto">
           <div className="max-w-[1600px] mx-auto px-6 py-8">
             {/* Page Title */}
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold text-gray-900">GHG Dashboard</h1>
-              <p className="text-gray-500 mt-1">
-                Monitor your greenhouse gas emissions across all scopes
-              </p>
+            <div className="mb-8 flex justify-between items-center">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">GHG Dashboard</h1>
+                <p className="text-gray-500 mt-1">
+                  Monitor your greenhouse gas emissions across all scopes
+                </p>
+              </div>
+              <Link
+                href="/reports"
+                className="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md transition-all flex items-center gap-2"
+                style={{ backgroundColor: '#006d43', color: 'white' }}
+              >
+                Go to BRSR Reports
+                <span className="text-lg">→</span>
+              </Link>
             </div>
 
             {/* KPI Cards Grid */}
