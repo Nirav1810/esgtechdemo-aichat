@@ -1,26 +1,28 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-import dbConnect from './mongodb';
-import { User } from '@/models/User';
+import { supabase } from './supabase';
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
-        await dbConnect();
-        
-        const user = await User.findOne({ email: credentials.email });
-        if (!user) {
+        const { data: user, error } = await supabase
+          .from('users')
+          .select('id, email, password, name')
+          .eq('email', credentials.email)
+          .single();
+
+        if (error || !user) {
           return null;
         }
 
@@ -30,12 +32,12 @@ export const authOptions: NextAuthOptions = {
         }
 
         return {
-          id: user._id.toString(),
+          id: user.id,
           email: user.email,
           name: user.name,
         };
-      }
-    })
+      },
+    }),
   ],
   session: {
     strategy: 'jwt',
@@ -55,6 +57,6 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
       }
       return session;
-    }
-  }
+    },
+  },
 };

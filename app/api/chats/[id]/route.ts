@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { Chat } from '@/models/Chat';
-import dbConnect from '@/lib/mongodb';
-import { Types } from 'mongoose';
+import { supabase } from '@/lib/supabase';
+import { mapChatRow } from '@/lib/db-mappers';
+import { insertMessages, fetchChatWithMessages } from '../route';
 
 export async function GET(
   req: Request,
@@ -14,22 +14,24 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  await dbConnect();
+  const { data: chat, error } = await supabase
+    .from('chats')
+    .select(`
+      *,
+      chat_messages (
+        *,
+        chat_message_attachments (*)
+      )
+    `)
+    .eq('id', params.id)
+    .eq('user_id', session.user.id)
+    .single();
 
-  if (!Types.ObjectId.isValid(params.id)) {
-    return NextResponse.json({ error: 'Invalid chat ID' }, { status: 400 });
-  }
-
-  const chat = await Chat.findOne({
-    _id: params.id,
-    userId: session.user.id,
-  });
-
-  if (!chat) {
+  if (error || !chat) {
     return NextResponse.json({ error: 'Chat not found' }, { status: 404 });
   }
 
-  return NextResponse.json({ chat: JSON.parse(JSON.stringify(chat)) });
+  return NextResponse.json({ chat: mapChatRow(chat) });
 }
 
 export async function PUT(
@@ -44,27 +46,41 @@ export async function PUT(
   const body = await req.json();
   const { messages, title } = body;
 
-  await dbConnect();
+  // Verify ownership
+  const { data: existing } = await supabase
+    .from('chats')
+    .select('id')
+    .eq('id', params.id)
+    .eq('user_id', session.user.id)
+    .single();
 
-  if (!Types.ObjectId.isValid(params.id)) {
-    return NextResponse.json({ error: 'Invalid chat ID' }, { status: 400 });
-  }
-
-  const updateData: Record<string, unknown> = { updatedAt: new Date() };
-  if (messages) updateData.messages = messages;
-  if (title) updateData.title = title;
-
-  const chat = await Chat.findOneAndUpdate(
-    { _id: params.id, userId: session.user.id },
-    { $set: updateData },
-    { new: true }
-  );
-
-  if (!chat) {
+  if (!existing) {
     return NextResponse.json({ error: 'Chat not found' }, { status: 404 });
   }
 
-  return NextResponse.json({ chat: JSON.parse(JSON.stringify(chat)) });
+  // Update title and updated_at
+  const updatePayload: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (title) updatePayload.title = title;
+
+  const { error: updateError } = await supabase
+    .from('chats')
+    .update(updatePayload)
+    .eq('id', params.id);
+
+  if (updateError) {
+    return NextResponse.json({ error: 'Failed to update chat' }, { status: 500 });
+  }
+
+  // Replace messages — delete all then re-insert
+  if (Array.isArray(messages)) {
+    await supabase.from('chat_messages').delete().eq('chat_id', params.id);
+    if (messages.length > 0) {
+      await insertMessages(params.id, messages);
+    }
+  }
+
+  const fullChat = await fetchChatWithMessages(params.id);
+  return NextResponse.json({ chat: fullChat });
 }
 
 export async function DELETE(
@@ -76,16 +92,15 @@ export async function DELETE(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  await dbConnect();
+  const { error } = await supabase
+    .from('chats')
+    .delete()
+    .eq('id', params.id)
+    .eq('user_id', session.user.id);
 
-  if (!Types.ObjectId.isValid(params.id)) {
-    return NextResponse.json({ error: 'Invalid chat ID' }, { status: 400 });
+  if (error) {
+    return NextResponse.json({ error: 'Failed to delete chat' }, { status: 500 });
   }
-
-  await Chat.findOneAndDelete({
-    _id: params.id,
-    userId: session.user.id,
-  });
 
   return NextResponse.json({ success: true });
 }

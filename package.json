@@ -8,10 +8,12 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "migrate": "tsx scripts/migrate-to-supabase.ts"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.3.2",
+    "@supabase/supabase-js": "^2.101.1",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/typography": "^0.5.19",
@@ -21,8 +23,6 @@
     "autoprefixer": "^10.4.24",
     "bcryptjs": "^3.0.3",
     "lucide-react": "^0.564.0",
-    "mongodb": "^7.1.0",
-    "mongoose": "^9.2.4",
     "next": "^14.2.35",
     "next-auth": "^4.24.13",
     "pdf2json": "^4.0.2",
@@ -45,6 +45,8 @@
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.35",
     "jsdom": "^27.4.0",
+    "mongodb": "^7.1.1",
+    "tsx": "^4.21.0",
     "vitest": "^4.0.18"
   }
 }

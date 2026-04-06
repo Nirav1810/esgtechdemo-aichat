@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { Chat } from '@/models/Chat';
-import dbConnect from '@/lib/mongodb';
+import { supabase } from '@/lib/supabase';
+import { mapChatRow } from '@/lib/db-mappers';
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
@@ -13,16 +13,29 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const pageType = searchParams.get('pageType');
 
-  await dbConnect();
-
-  const query: Record<string, unknown> = { userId: session.user.id };
-  if (pageType) {
-    query.pageType = pageType;
-  }
-
-  const chats = await Chat.find(query)
-    .sort({ updatedAt: -1 })
+  let query = supabase
+    .from('chats')
+    .select(`
+      *,
+      chat_messages (
+        *,
+        chat_message_attachments (*)
+      )
+    `)
+    .eq('user_id', session.user.id)
+    .order('updated_at', { ascending: false })
     .limit(100);
 
-  return NextResponse.json({ chats: JSON.parse(JSON.stringify(chats)) });
+  if (pageType) {
+    query = query.eq('page_type', pageType);
+  }
+
+  const { data: chats, error } = await query;
+
+  if (error) {
+    console.error('Error fetching all chats:', error);
+    return NextResponse.json({ error: 'Failed to fetch chats' }, { status: 500 });
+  }
+
+  return NextResponse.json({ chats: (chats ?? []).map(mapChatRow) });
 }

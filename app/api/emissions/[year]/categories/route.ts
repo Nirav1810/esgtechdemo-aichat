@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import { EmissionCategory } from "@/models/EmissionCategory";
+import { NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
+import { mapEmissionCategoryRow } from '@/lib/db-mappers';
 
 export async function GET(
   req: Request,
@@ -8,14 +8,18 @@ export async function GET(
 ) {
   try {
     const { year } = await params;
-    await dbConnect();
 
-    const categories = await EmissionCategory.find({ fiscal_year: year }).lean();
+    const { data: rows, error } = await supabase
+      .from('emission_categories')
+      .select('*')
+      .eq('fiscal_year', year);
 
-    return NextResponse.json(categories);
+    if (error) throw error;
+
+    return NextResponse.json((rows ?? []).map(mapEmissionCategoryRow));
   } catch (error) {
-    console.error("Error fetching categories:", error);
-    return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 });
+    console.error('Error fetching categories:', error);
+    return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 });
   }
 }
 
@@ -25,32 +29,35 @@ export async function PUT(
 ) {
   try {
     const { year } = await params;
-    await dbConnect();
     const body = await req.json();
     const { data } = body;
 
     if (!Array.isArray(data)) {
-      return NextResponse.json({ error: "Data array required" }, { status: 400 });
+      return NextResponse.json({ error: 'Data array required' }, { status: 400 });
     }
 
-    await EmissionCategory.deleteMany({ fiscal_year: year });
+    // Delete existing then insert new (same behaviour as the old Mongoose version)
+    await supabase.from('emission_categories').delete().eq('fiscal_year', year);
 
     if (data.length > 0) {
-      const records = data.map((item: any) => ({
+      const rows = data.map((item: any) => ({
         fiscal_year: year,
         scope: 3,
         category: item.name || item.category,
         value: item.value,
-        color: item.color || "#6366f1"
+        color: item.color || '#6366f1',
       }));
-      await EmissionCategory.insertMany(records);
+      await supabase.from('emission_categories').insert(rows);
     }
 
-    const updatedCategories = await EmissionCategory.find({ fiscal_year: year }).lean();
+    const { data: updatedRows } = await supabase
+      .from('emission_categories')
+      .select('*')
+      .eq('fiscal_year', year);
 
-    return NextResponse.json(updatedCategories);
+    return NextResponse.json((updatedRows ?? []).map(mapEmissionCategoryRow));
   } catch (error) {
-    console.error("Error updating categories:", error);
-    return NextResponse.json({ error: "Failed to update categories" }, { status: 500 });
+    console.error('Error updating categories:', error);
+    return NextResponse.json({ error: 'Failed to update categories' }, { status: 500 });
   }
 }

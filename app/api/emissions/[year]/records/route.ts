@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import { EmissionRecord } from "@/models/EmissionRecord";
+import { NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
+import { mapEmissionRecordRow, emissionRecordToRow } from '@/lib/db-mappers';
 
 export async function GET(
   req: Request,
@@ -9,23 +9,28 @@ export async function GET(
   try {
     const { year } = await params;
     const { searchParams } = new URL(req.url);
-    const scope = searchParams.get("scope");
-    const category = searchParams.get("category");
-    const siteName = searchParams.get("siteName");
+    const scope = searchParams.get('scope');
+    const category = searchParams.get('category');
+    const siteName = searchParams.get('siteName');
 
-    await dbConnect();
+    let query = supabase
+      .from('emission_records')
+      .select('*')
+      .eq('fiscal_year', year)
+      .order('date', { ascending: false });
 
-    const filter: any = { fiscal_year: year };
-    if (scope) filter.scope = parseInt(scope);
-    if (category) filter.category = category;
-    if (siteName) filter.siteName = { $regex: siteName, $options: "i" };
+    if (scope) query = query.eq('scope', parseInt(scope));
+    if (category) query = query.eq('category', category);
+    // Supabase ILIKE replaces MongoDB $regex with $options: 'i'
+    if (siteName) query = query.ilike('site_name', `%${siteName}%`);
 
-    const records = await EmissionRecord.find(filter).sort({ date: -1 }).lean();
+    const { data: rows, error } = await query;
+    if (error) throw error;
 
-    return NextResponse.json(records);
+    return NextResponse.json((rows ?? []).map(mapEmissionRecordRow));
   } catch (error) {
-    console.error("Error fetching records:", error);
-    return NextResponse.json({ error: "Failed to fetch records" }, { status: 500 });
+    console.error('Error fetching records:', error);
+    return NextResponse.json({ error: 'Failed to fetch records' }, { status: 500 });
   }
 }
 
@@ -35,18 +40,22 @@ export async function POST(
 ) {
   try {
     const { year } = await params;
-    await dbConnect();
     const body = await req.json();
 
-    const record = await EmissionRecord.create({
-      fiscal_year: year,
-      ...body
-    });
+    const rowData = emissionRecordToRow({ ...body, fiscal_year: year });
 
-    return NextResponse.json(record);
+    const { data: row, error } = await supabase
+      .from('emission_records')
+      .insert(rowData)
+      .select()
+      .single();
+
+    if (error || !row) throw error;
+
+    return NextResponse.json(mapEmissionRecordRow(row));
   } catch (error) {
-    console.error("Error creating record:", error);
-    return NextResponse.json({ error: "Failed to create record" }, { status: 500 });
+    console.error('Error creating record:', error);
+    return NextResponse.json({ error: 'Failed to create record' }, { status: 500 });
   }
 }
 
@@ -55,29 +64,34 @@ export async function PUT(
   { params }: { params: Promise<{ year: string }> }
 ) {
   try {
-    const { year } = await params;
-    await dbConnect();
+    await params; // year is not needed for update-by-id but required by Next.js routing
     const body = await req.json();
     const { id, ...updateData } = body;
 
     if (!id) {
-      return NextResponse.json({ error: "Record ID is required" }, { status: 400 });
+      return NextResponse.json({ error: 'Record ID is required' }, { status: 400 });
     }
 
-    const record = await EmissionRecord.findByIdAndUpdate(
-      id,
-      { $set: updateData },
-      { new: true, runValidators: true }
-    );
+    const rowData = {
+      ...emissionRecordToRow(updateData),
+      updated_at: new Date().toISOString(),
+    };
 
-    if (!record) {
-      return NextResponse.json({ error: "Record not found" }, { status: 404 });
+    const { data: row, error } = await supabase
+      .from('emission_records')
+      .update(rowData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error || !row) {
+      return NextResponse.json({ error: 'Record not found' }, { status: 404 });
     }
 
-    return NextResponse.json(record);
+    return NextResponse.json(mapEmissionRecordRow(row));
   } catch (error) {
-    console.error("Error updating record:", error);
-    return NextResponse.json({ error: "Failed to update record" }, { status: 500 });
+    console.error('Error updating record:', error);
+    return NextResponse.json({ error: 'Failed to update record' }, { status: 500 });
   }
 }
 
@@ -86,20 +100,24 @@ export async function DELETE(
   { params }: { params: Promise<{ year: string }> }
 ) {
   try {
-    const { year } = await params;
+    await params;
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+    const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ error: "Record ID is required" }, { status: 400 });
+      return NextResponse.json({ error: 'Record ID is required' }, { status: 400 });
     }
 
-    await dbConnect();
-    await EmissionRecord.findByIdAndDelete(id);
+    const { error } = await supabase
+      .from('emission_records')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting record:", error);
-    return NextResponse.json({ error: "Failed to delete record" }, { status: 500 });
+    console.error('Error deleting record:', error);
+    return NextResponse.json({ error: 'Failed to delete record' }, { status: 500 });
   }
 }

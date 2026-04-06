@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import dbConnect from '@/lib/mongodb';
-import { User } from '@/models/User';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {
   try {
@@ -15,36 +14,43 @@ export async function POST(req: Request) {
       );
     }
 
-    await dbConnect();
+    // Check for existing user
+    const { data: existing } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .single();
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return NextResponse.json(
-        { error: 'User already exists' },
-        { status: 400 }
-      );
+    if (existing) {
+      return NextResponse.json({ error: 'User already exists' }, { status: 400 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const user = await User.create({
-      email,
-      password: hashedPassword,
-      name: name || email.split('@')[0],
-    });
+    const { data: user, error } = await supabase
+      .from('users')
+      .insert({
+        email,
+        password: hashedPassword,
+        name: name || email.split('@')[0],
+      })
+      .select('id, email, name')
+      .single();
+
+    if (error || !user) {
+      console.error('Supabase insert error:', error);
+      return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
+    }
 
     return NextResponse.json({
       user: {
-        id: user._id.toString(),
+        id: user.id,
         email: user.email,
         name: user.name,
       },
     });
   } catch (error) {
     console.error('Registration error:', error);
-    return NextResponse.json(
-      { error: 'Something went wrong' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }
