@@ -17,7 +17,7 @@ const MAX_PDF_CHARS = 40_000;
  */
 const EXTRACTION_MODELS = [
   "Qwen/Qwen3-235B-A22B-Instruct-2507-TEE",
-  "Qwen/Qwen3-32B",
+  "openai/gpt-oss-120b-TEE",
   "deepseek-ai/DeepSeek-V3-0324",
   "zai-org/GLM-4.7-TEE",
 ];
