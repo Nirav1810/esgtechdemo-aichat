@@ -570,7 +570,7 @@ export default function GuidedEntry({
           <div className="max-w-5xl mx-auto mt-6 flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-xl px-5 py-3">
             <span className="material-symbols-outlined text-blue-500">auto_awesome</span>
             <p className="text-sm text-blue-700">
-              <strong>Previous Year data extracted from your PDF</strong> is pre-filled as reference inside each question's wizard.
+              <strong>Previous Year data extracted from your PDF</strong> is pre-filled as reference inside each question&apos;s wizard.
               Highlighted in <span className="text-amber-600 font-semibold">amber</span> if not found.
             </p>
           </div>

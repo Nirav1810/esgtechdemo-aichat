@@ -33,7 +33,7 @@ export default function Overview({ setCurrentView, isUploaded, step, totalSteps,
             <span className="material-symbols-outlined text-3xl">upload_file</span>
           </div>
           <h3 className="text-xl font-bold">1. Data Upload</h3>
-          <p className="text-sm text-on-surface-variant flex-1">Upload last year's records to create your baseline metrics.</p>
+          <p className="text-sm text-on-surface-variant flex-1">Upload last year&apos;s records to create your baseline metrics.</p>
           <button
             onClick={() => setCurrentView('upload')}
             className={`w-full mt-4 font-bold py-3 rounded-full transition-colors ${isUploaded ? 'bg-surface-container-low text-emerald-800 hover:bg-emerald-100 border border-emerald-200' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}

@@ -200,6 +200,7 @@ export default function GHGReportPage() {
   // Fetch emissions data when year changes
   useEffect(() => {
     fetchEmissionsData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedYear]);
 
   const fetchEmissionsData = async () => {

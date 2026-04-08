@@ -200,7 +200,7 @@ const SubHead = ({ label }: { label: string }) => (
   </View>
 );
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line
 type AnyStyle = any;
 const TRow = ({
   label, unit, fy, py,

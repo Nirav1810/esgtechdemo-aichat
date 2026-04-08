@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { mapChatRow } from '@/lib/db-mappers';
-import { insertMessages, fetchChatWithMessages } from '../route';
+import { insertMessages, fetchChatWithMessages } from '@/lib/chat-utils';
 
 export async function GET(
   req: Request,

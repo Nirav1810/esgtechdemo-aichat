@@ -73,3 +73,8 @@ opencode.json
 .worktrees/
 docs/
 
+# Temporary / Generated Scripts & Docs
+*.docx
+scripts/
+generate_grid.js
+tmp_find_pages.js
