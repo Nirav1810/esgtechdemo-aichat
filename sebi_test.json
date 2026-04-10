@@ -1,0 +1,1098 @@
+[
+  {
+    "row": 5,
+    "text": "PRINCIPLE 6: Businesses should respect and make efforts to protect and restore the environment",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "PRINCIPLE 6: Businesses should respect and make efforts to protect and restore the environment"
+      },
+      {
+        "i": 16,
+        "v": "Kg"
+      },
+      {
+        "i": 17,
+        "v": "Million KL"
+      },
+      {
+        "i": 26,
+        "v": "Taxonomy"
+      },
+      {
+        "i": 32,
+        "v": "AddNewElemnt10"
+      },
+      {
+        "i": 33,
+        "v": "AddNewElemnt10"
+      },
+      {
+        "i": 34,
+        "v": "AddNewElemnt10"
+      }
+    ]
+  },
+  {
+    "row": 6,
+    "text": "Essential Indicators",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Essential Indicators"
+      },
+      {
+        "i": 16,
+        "v": "mg/Nm3"
+      },
+      {
+        "i": 17,
+        "v": "Million Cubic Meter"
+      }
+    ]
+  },
+  {
+    "row": 7,
+    "text": "1. Details of total energy consumption (in Joules or multiples) and energy intensity, in the following format:",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "1. Details of total energy consumption (in Joules or multiples) and energy intensity, in the following format:"
+      },
+      {
+        "i": 16,
+        "v": "kgSOxe"
+      },
+      {
+        "i": 26,
+        "v": "Element Name"
+      },
+      {
+        "i": 27,
+        "v": "Label name"
+      },
+      {
+        "i": 28,
+        "v": "type"
+      },
+      {
+        "i": 29,
+        "v": "I/D"
+      },
+      {
+        "i": 30,
+        "v": "validations"
+      }
+    ]
+  },
+  {
+    "row": 8,
+    "text": "Whether total energy consumption and energy intensity is applicable to the company?",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Whether total energy consumption and energy intensity is applicable to the company?"
+      },
+      {
+        "i": 16,
+        "v": "Tonnes/Year"
+      },
+      {
+        "i": 32,
+        "v": "WhetherDetailsOfTotalEnergyConsumptionAndEnergyIntensityApplicableToTheCompany"
+      }
+    ]
+  },
+  {
+    "row": 9,
+    "text": "Revenue from operations (in Rs.)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Revenue from operations (in Rs.)"
+      },
+      {
+        "i": 5,
+        "v": "FY (-)"
+      },
+      {
+        "i": 6,
+        "v": "PY (-)"
+      },
+      {
+        "i": 16,
+        "v": "Parts Per Million (PPM)"
+      }
+    ]
+  },
+  {
+    "row": 11,
+    "text": "Parameter",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Parameter"
+      },
+      {
+        "i": 4,
+        "v": "Units"
+      },
+      {
+        "i": 5,
+        "v": "FY (-)"
+      },
+      {
+        "i": 6,
+        "v": "PY (-)"
+      },
+      {
+        "i": 16,
+        "v": "tCO2e"
+      }
+    ]
+  },
+  {
+    "row": 12,
+    "text": "From renewable sources",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "From renewable sources"
+      },
+      {
+        "i": 16,
+        "v": "Kg/Year"
+      }
+    ]
+  },
+  {
+    "row": 13,
+    "text": "Total electricity consumption (A)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Total electricity consumption (A)"
+      },
+      {
+        "i": 27,
+        "v": "Totalelectricityconsumption\r\r\n(A)"
+      },
+      {
+        "i": 28,
+        "v": "Total electricity consumption\r\n(A)"
+      },
+      {
+        "i": 31,
+        "v": "This is a mandatory field"
+      },
+      {
+        "i": 32,
+        "v": "TotalElectricityConsumptionFromRenewableSources"
+      },
+      {
+        "i": 33,
+        "v": "TotalElectricityConsumptionFromRenewableSources"
+      },
+      {
+        "i": 34,
+        "v": "TotalElectricityConsumptionFromRenewableSources"
+      }
+    ]
+  },
+  {
+    "row": 14,
+    "text": "Total fuel consumption (B)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Total fuel consumption (B)"
+      },
+      {
+        "i": 27,
+        "v": "Totalfuelconsumption(B)"
+      },
+      {
+        "i": 28,
+        "v": "Total fuel consumption (B)"
+      },
+      {
+        "i": 31,
+        "v": "This is a mandatory field"
+      },
+      {
+        "i": 32,
+        "v": "TotalFuelConsumptionFromRenewableSources"
+      },
+      {
+        "i": 33,
+        "v": "TotalFuelConsumptionFromRenewableSources"
+      },
+      {
+        "i": 34,
+        "v": "TotalFuelConsumptionFromRenewableSources"
+      }
+    ]
+  },
+  {
+    "row": 15,
+    "text": "Energy consumption through other sources (C)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Energy consumption through other sources (C)"
+      },
+      {
+        "i": 32,
+        "v": "EnergyConsumptionThroughOtherSourcesFromRenewableSources"
+      },
+      {
+        "i": 33,
+        "v": "EnergyConsumptionThroughOtherSourcesFromRenewableSources"
+      },
+      {
+        "i": 34,
+        "v": "EnergyConsumptionThroughOtherSourcesFromRenewableSources"
+      }
+    ]
+  },
+  {
+    "row": 16,
+    "text": "Total energy consumed from renewable sources (A+B+C)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Total energy consumed from renewable sources (A+B+C)"
+      },
+      {
+        "i": 32,
+        "v": "TotalEnergyConsumedFromRenewableSources"
+      },
+      {
+        "i": 33,
+        "v": "TotalEnergyConsumedFromRenewableSources"
+      },
+      {
+        "i": 34,
+        "v": "TotalEnergyConsumedFromRenewableSources"
+      }
+    ]
+  },
+  {
+    "row": 17,
+    "text": "From non-renewable sources",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "From non-renewable sources"
+      }
+    ]
+  },
+  {
+    "row": 18,
+    "text": "Total electricity consumption (D)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Total electricity consumption (D)"
+      },
+      {
+        "i": 26,
+        "v": "Totalelectricityconsumption\r\n(D)"
+      },
+      {
+        "i": 27,
+        "v": "Total electricity consumption\r\n(D)"
+      },
+      {
+        "i": 30,
+        "v": "This is a mandatory field"
+      },
+      {
+        "i": 32,
+        "v": "TotalElectricityConsumptionFromNonRenewableSources"
+      },
+      {
+        "i": 33,
+        "v": "TotalElectricityConsumptionFromNonRenewableSources"
+      },
+      {
+        "i": 34,
+        "v": "TotalElectricityConsumptionFromNonRenewableSources"
+      }
+    ]
+  },
+  {
+    "row": 19,
+    "text": "Total fuel consumption (E)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Total fuel consumption (E)"
+      },
+      {
+        "i": 26,
+        "v": "Totalfuelconsumption(E)"
+      },
+      {
+        "i": 27,
+        "v": "Total fuel consumption (E)"
+      },
+      {
+        "i": 30,
+        "v": "This is a mandatory field"
+      },
+      {
+        "i": 32,
+        "v": "TotalFuelConsumptionFromNonRenewableSources"
+      },
+      {
+        "i": 33,
+        "v": "TotalFuelConsumptionFromNonRenewableSources"
+      },
+      {
+        "i": 34,
+        "v": "TotalFuelConsumptionFromNonRenewableSources"
+      }
+    ]
+  },
+  {
+    "row": 20,
+    "text": "Energy consumption through other sources (F)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Energy consumption through other sources (F)"
+      },
+      {
+        "i": 32,
+        "v": "EnergyConsumptionThroughOtherSourcesFromNonRenewableSources"
+      },
+      {
+        "i": 33,
+        "v": "EnergyConsumptionThroughOtherSourcesFromNonRenewableSources"
+      },
+      {
+        "i": 34,
+        "v": "EnergyConsumptionThroughOtherSourcesFromNonRenewableSources"
+      }
+    ]
+  },
+  {
+    "row": 21,
+    "text": "Total energy consumed from non-renewable sources (D+E+F)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Total energy consumed from non-renewable sources (D+E+F)"
+      },
+      {
+        "i": 32,
+        "v": "TotalEnergyConsumedFromNonRenewableSources"
+      },
+      {
+        "i": 33,
+        "v": "TotalEnergyConsumedFromNonRenewableSources"
+      },
+      {
+        "i": 34,
+        "v": "TotalEnergyConsumedFromNonRenewableSources"
+      }
+    ]
+  },
+  {
+    "row": 22,
+    "text": "Total energy consumed (A+B+C+D+E+F)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Total energy consumed (A+B+C+D+E+F)"
+      },
+      {
+        "i": 32,
+        "v": "EnergyintensityintermsofphysicalOutput1"
+      },
+      {
+        "i": 33,
+        "v": "TotalEnergyConsumedFromRenewableAndNonRenewableSources"
+      },
+      {
+        "i": 34,
+        "v": "TotalEnergyConsumedFromRenewableAndNonRenewableSources"
+      }
+    ]
+  },
+  {
+    "row": 23,
+    "text": "Energy intensity per rupee of turnover (Total energy consumed / Revenue from operations)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Energy intensity per rupee of turnover (Total energy consumed / Revenue from operations)"
+      },
+      {
+        "i": 32,
+        "v": "EnergyIntensityPerRupeeOfTurnover"
+      },
+      {
+        "i": 33,
+        "v": "EnergyIntensityPerRupeeOfTurnover"
+      },
+      {
+        "i": 34,
+        "v": "EnergyIntensityPerRupeeOfTurnover"
+      }
+    ]
+  },
+  {
+    "row": 24,
+    "text": "Energy intensity per rupee of turnover adjusted for Purchasing Power Parity (PPP)\r\n(Total energy consumed / Revenue from operations adjusted for PPP)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Energy intensity per rupee of turnover adjusted for Purchasing Power Parity (PPP)\r\n(Total energy consumed / Revenue from operations adjusted for PPP)"
+      },
+      {
+        "i": 32,
+        "v": "EnergyIntensityPerRupeeOfTurnoverAdjustingForPurchasingPowerParity"
+      },
+      {
+        "i": 33,
+        "v": "EnergyIntensityPerRupeeOfTurnoverAdjustingForPurchasingPowerParity"
+      },
+      {
+        "i": 34,
+        "v": "EnergyIntensityPerRupeeOfTurnoverAdjustingForPurchasingPowerParity"
+      }
+    ]
+  },
+  {
+    "row": 25,
+    "text": "Energy intensity in terms of physical Output",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Energy intensity in terms of physical Output"
+      },
+      {
+        "i": 32,
+        "v": "EnergyIntensityInTermOfPhysicalOutput"
+      },
+      {
+        "i": 33,
+        "v": "EnergyIntensityInTermOfPhysicalOutput"
+      },
+      {
+        "i": 34,
+        "v": "EnergyIntensityInTermOfPhysicalOutput"
+      }
+    ]
+  },
+  {
+    "row": 26,
+    "text": "Energy intensity (optional) – the relevant metric may be selected by the entity",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Energy intensity (optional) – the relevant metric may be selected by the entity"
+      },
+      {
+        "i": 32,
+        "v": "EnergyIntensityTheRelevantMetricMayBeSelectedByTheEntity"
+      },
+      {
+        "i": 33,
+        "v": "EnergyIntensityTheRelevantMetricMayBeSelectedByTheEntity"
+      },
+      {
+        "i": 34,
+        "v": "EnergyIntensityTheRelevantMetricMayBeSelectedByTheEntity"
+      }
+    ]
+  },
+  {
+    "row": 27,
+    "text": "Note: Indicate if any independent assessment/ evaluation/assurance has been carried out by an external agency? (Y/N)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Note: Indicate if any independent assessment/ evaluation/assurance has been carried out by an external agency? (Y/N)"
+      },
+      {
+        "i": 26,
+        "v": "Note:Indicateifanyindependentassessment/evaluation/assurancehasbeencarriedoutbyanexternalagency?(Y/N)"
+      },
+      {
+        "i": 27,
+        "v": "Note: Indicate if any independent assessment/ evaluation/assurance has been carried out by an external agency? (Y/N)"
+      },
+      {
+        "i": 30,
+        "v": "This is a mandatory field"
+      },
+      {
+        "i": 32,
+        "v": "WhetherAnyIndependentAssessmentOrEvaluationOrAssuranceHasBeenCarriedOutByAnExternalAgencyForEnergyConsumptionUnderLeadershipIndicators"
+      },
+      {
+        "i": 33,
+        "v": "WhetherAnyIndependentAssessmentOrEvaluationOrAssuranceHasBeenCarriedOutByAnExternalAgencyForEnergyConsumptionUnderLeadershipIndicators"
+      },
+      {
+        "i": 34,
+        "v": "WhetherAnyIndependentAssessmentOrEvaluationOrAssuranceHasBeenCarriedOutByAnExternalAgencyForEnergyConsumptionUnderLeadershipIndicators"
+      }
+    ]
+  },
+  {
+    "row": 28,
+    "text": "If yes, name of the external agency.",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "If yes, name of the external agency."
+      },
+      {
+        "i": 32,
+        "v": "NameOfTheExternalAgencyThatUndertookIndependentAssessmentOrEvaluationOrAssuranceForEnergyConsumptionExplanatoryTextBlock"
+      },
+      {
+        "i": 33,
+        "v": "NameOfTheExternalAgencyThatUndertookIndependentAssessmentOrEvaluationOrAssuranceForEnergyConsumptionExplanatoryTextBlock"
+      },
+      {
+        "i": 34,
+        "v": "NameOfTheExternalAgencyThatUndertookIndependentAssessmentOrEvaluationOrAssuranceForEnergyConsumptionExplanatoryTextBlock"
+      }
+    ]
+  },
+  {
+    "row": 29,
+    "text": "2. Does the entity have any sites / facilities identified as designated consumers (DCs) under the Performance, Achieve and Trade (PAT) Scheme of the Government of India?",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "2. Does the entity have any sites / facilities identified as designated consumers (DCs) under the Performance, Achieve and Trade (PAT) Scheme of the Government of India?"
+      },
+      {
+        "i": 26,
+        "v": "DoesTheEntityHaveAnySitesOrFacilitiesIdentifiedAsDesignatedConsumersUnderThePerformanceAchieveAndTradeSchemeOfTheGovernmentOfIndia"
+      },
+      {
+        "i": 27,
+        "v": "2. Does the entity have any sites / facilities identified as designated consumers (DCs) under the Performance, Achieve and Trade (PAT) Scheme of the Government of India?"
+      },
+      {
+        "i": 30,
+        "v": "This is a mandatory field"
+      },
+      {
+        "i": 32,
+        "v": "DoesTheEntityHaveAnySitesOrFacilitiesIdentifiedAsDesignatedConsumersUnderThePerformanceAchieveAndTradeSchemeOfTheGovernmentOfIndia"
+      },
+      {
+        "i": 33,
+        "v": "DoesTheEntityHaveAnySitesOrFacilitiesIdentifiedAsDesignatedConsumersUnderThePerformanceAchieveAndTradeSchemeOfTheGovernmentOfIndia"
+      },
+      {
+        "i": 34,
+        "v": "DoesTheEntityHaveAnySitesOrFacilitiesIdentifiedAsDesignatedConsumersUnderThePerformanceAchieveAndTradeSchemeOfTheGovernmentOfIndia"
+      }
+    ]
+  },
+  {
+    "row": 30,
+    "text": "If yes, disclose whether targets set under the PAT scheme have been achieved. In case targets have not been achieved, provide the remedial action taken, if any.",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "If yes, disclose whether targets set under the PAT scheme have been achieved. In case targets have not been achieved, provide the remedial action taken, if any."
+      },
+      {
+        "i": 26,
+        "v": "DiscloseWhetherTargetsSetUnderThePatSchemeHaveBeenAchievedInCaseTargetsHaveNotBeenAchievedThenProvideTheRemedialActionTakenExplanatoryTextBlock"
+      },
+      {
+        "i": 32,
+        "v": "DiscloseWhetherTargetsSetUnderThePatSchemeHaveBeenAchievedInCaseTargetsHaveNotBeenAchievedThenProvideTheRemedialActionTakenExplanatoryTextBlock"
+      },
+      {
+        "i": 33,
+        "v": "DiscloseWhetherTargetsSetUnderThePatSchemeHaveBeenAchievedInCaseTargetsHaveNotBeenAchievedThenProvideTheRemedialActionTakenExplanatoryTextBlock"
+      },
+      {
+        "i": 34,
+        "v": "DiscloseWhetherTargetsSetUnderThePatSchemeHaveBeenAchievedInCaseTargetsHaveNotBeenAchievedThenProvideTheRemedialActionTakenExplanatoryTextBlock"
+      }
+    ]
+  },
+  {
+    "row": 31,
+    "text": "3. Provide details of the following disclosures related to water, in the following format:",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "3. Provide details of the following disclosures related to water, in the following format:"
+      }
+    ]
+  },
+  {
+    "row": 32,
+    "text": "Parameter",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Parameter"
+      },
+      {
+        "i": 4,
+        "v": "FY (-)"
+      },
+      {
+        "i": 5,
+        "v": "PY (-)"
+      }
+    ]
+  },
+  {
+    "row": 33,
+    "text": "Water withdrawal by source (in kilolitres)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Water withdrawal by source (in kilolitres)"
+      },
+      {
+        "i": 26,
+        "v": "Waterwithdrawalbysource(inkilolitres)"
+      },
+      {
+        "i": 27,
+        "v": "Water withdrawal by source (in kilolitres)"
+      },
+      {
+        "i": 30,
+        "v": "This is a mandatory field"
+      }
+    ]
+  },
+  {
+    "row": 34,
+    "text": "(i) Surface water",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "(i) Surface water"
+      },
+      {
+        "i": 26,
+        "v": "(i)Surfacewater"
+      },
+      {
+        "i": 27,
+        "v": "(i) Surface water"
+      },
+      {
+        "i": 30,
+        "v": "This is a mandatory field"
+      },
+      {
+        "i": 32,
+        "v": "WaterWithdrawalBySurfaceWater"
+      },
+      {
+        "i": 33,
+        "v": "WaterWithdrawalBySurfaceWater"
+      },
+      {
+        "i": 34,
+        "v": "WaterWithdrawalBySurfaceWater"
+      }
+    ]
+  },
+  {
+    "row": 35,
+    "text": "(ii) Groundwater",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "(ii) Groundwater"
+      },
+      {
+        "i": 26,
+        "v": "(ii)Groundwater"
+      },
+      {
+        "i": 27,
+        "v": "(ii) Groundwater"
+      },
+      {
+        "i": 30,
+        "v": "This is a mandatory field"
+      },
+      {
+        "i": 32,
+        "v": "WaterWithdrawalByGroundwater"
+      },
+      {
+        "i": 33,
+        "v": "WaterWithdrawalByGroundwater"
+      },
+      {
+        "i": 34,
+        "v": "WaterWithdrawalByGroundwater"
+      }
+    ]
+  },
+  {
+    "row": 36,
+    "text": "(iii) Third party water",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "(iii) Third party water"
+      },
+      {
+        "i": 26,
+        "v": "(iii)Thirdpartywater"
+      },
+      {
+        "i": 27,
+        "v": "(iii) Third party water"
+      },
+      {
+        "i": 30,
+        "v": "This is a mandatory field"
+      },
+      {
+        "i": 32,
+        "v": "WaterWithdrawalByThirdPartyWater"
+      },
+      {
+        "i": 33,
+        "v": "WaterWithdrawalByThirdPartyWater"
+      },
+      {
+        "i": 34,
+        "v": "WaterWithdrawalByThirdPartyWater"
+      }
+    ]
+  },
+  {
+    "row": 37,
+    "text": "(iv) Seawater / desalinated water",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "(iv) Seawater / desalinated water"
+      },
+      {
+        "i": 26,
+        "v": "(iv)Seawater/desalinatedwater"
+      },
+      {
+        "i": 27,
+        "v": "(iv) Seawater / desalinated water"
+      },
+      {
+        "i": 30,
+        "v": "This is a mandatory field"
+      },
+      {
+        "i": 32,
+        "v": "WaterWithdrawalBySeawaterOrDesalinatedWater"
+      },
+      {
+        "i": 33,
+        "v": "WaterWithdrawalBySeawaterOrDesalinatedWater"
+      },
+      {
+        "i": 34,
+        "v": "WaterWithdrawalBySeawaterOrDesalinatedWater"
+      }
+    ]
+  },
+  {
+    "row": 38,
+    "text": "(v) Others",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "(v) Others"
+      },
+      {
+        "i": 26,
+        "v": "(v)Others"
+      },
+      {
+        "i": 27,
+        "v": "(v) Others"
+      },
+      {
+        "i": 30,
+        "v": "This is a mandatory field"
+      },
+      {
+        "i": 32,
+        "v": "WaterWithdrawalByOthers"
+      },
+      {
+        "i": 33,
+        "v": "WaterWithdrawalByOthers"
+      },
+      {
+        "i": 34,
+        "v": "WaterWithdrawalByOthers"
+      }
+    ]
+  },
+  {
+    "row": 39,
+    "text": "Total volume of water withdrawal (in kilolitres) (i + ii + iii + iv + v)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Total volume of water withdrawal (in kilolitres) (i + ii + iii + iv + v)"
+      },
+      {
+        "i": 32,
+        "v": "TotalVolumeOfWaterWithdrawal"
+      },
+      {
+        "i": 33,
+        "v": "TotalVolumeOfWaterWithdrawal"
+      },
+      {
+        "i": 34,
+        "v": "TotalVolumeOfWaterWithdrawal"
+      }
+    ]
+  },
+  {
+    "row": 40,
+    "text": "Total volume of water consumption (in kilolitres)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Total volume of water consumption (in kilolitres)"
+      },
+      {
+        "i": 26,
+        "v": "Totalvolumeofwaterconsumption\r\r\n(inkilolitres)"
+      },
+      {
+        "i": 27,
+        "v": "Total volume of water consumption\r\n(in kilolitres)"
+      },
+      {
+        "i": 30,
+        "v": "This is a mandatory field"
+      },
+      {
+        "i": 32,
+        "v": "TotalVolumeOfWaterConsumption"
+      },
+      {
+        "i": 33,
+        "v": "TotalVolumeOfWaterConsumption"
+      },
+      {
+        "i": 34,
+        "v": "TotalVolumeOfWaterConsumption"
+      }
+    ]
+  },
+  {
+    "row": 41,
+    "text": "Water intensity per rupee of turnover (Total water consumption / Revenue from operations)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Water intensity per rupee of turnover (Total water consumption / Revenue from operations)"
+      },
+      {
+        "i": 26,
+        "v": "WaterIntensityPerRupeeOfTurnover"
+      },
+      {
+        "i": 27,
+        "v": "Water intensity per rupee of\r\nturnover (Water consumed / turnover)"
+      },
+      {
+        "i": 30,
+        "v": "This is a mandatory field"
+      },
+      {
+        "i": 32,
+        "v": "WaterIntensityPerRupeeOfTurnover"
+      },
+      {
+        "i": 33,
+        "v": "WaterIntensityPerRupeeOfTurnover"
+      },
+      {
+        "i": 34,
+        "v": "WaterIntensityPerRupeeOfTurnover"
+      }
+    ]
+  },
+  {
+    "row": 42,
+    "text": "Water intensity per rupee of turnover adjusted for Purchasing Power Parity (PPP)\r\n(Total water consumption / Revenue from operations adjusted for PPP)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Water intensity per rupee of turnover adjusted for Purchasing Power Parity (PPP)\r\n(Total water consumption / Revenue from operations adjusted for PPP)"
+      },
+      {
+        "i": 26,
+        "v": "WaterIntensityPerRupeeOfTurnoverAdjustingForPurchasingPowerParity"
+      },
+      {
+        "i": 32,
+        "v": "WaterIntensityPerRupeeOfTurnoverAdjustingForPurchasingPowerParity"
+      },
+      {
+        "i": 33,
+        "v": "WaterIntensityPerRupeeOfTurnoverAdjustingForPurchasingPowerParity"
+      },
+      {
+        "i": 34,
+        "v": "WaterIntensityPerRupeeOfTurnoverAdjustingForPurchasingPowerParity"
+      }
+    ]
+  },
+  {
+    "row": 43,
+    "text": "Water intensity in terms of physical output",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Water intensity in terms of physical output"
+      },
+      {
+        "i": 26,
+        "v": "WaterIntensityInTermOfPhysicalOutput"
+      },
+      {
+        "i": 32,
+        "v": "WaterIntensityInTermOfPhysicalOutput"
+      },
+      {
+        "i": 33,
+        "v": "WaterIntensityInTermOfPhysicalOutput"
+      },
+      {
+        "i": 34,
+        "v": "WaterIntensityInTermOfPhysicalOutput"
+      }
+    ]
+  },
+  {
+    "row": 44,
+    "text": "Water intensity (optional) – the relevant metric may be selected by the entity",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Water intensity (optional) – the relevant metric may be selected by the entity"
+      },
+      {
+        "i": 26,
+        "v": "WaterIntensityTheRelevantMetricMayBeSelectedByTheEntity"
+      },
+      {
+        "i": 27,
+        "v": "Water intensity (optional) – the\r\nrelevant metric may be selected by the entity"
+      },
+      {
+        "i": 30,
+        "v": "This is a mandatory field"
+      },
+      {
+        "i": 32,
+        "v": "WaterIntensityTheRelevantMetricMayBeSelectedByTheEntity"
+      },
+      {
+        "i": 33,
+        "v": "WaterIntensityTheRelevantMetricMayBeSelectedByTheEntity"
+      },
+      {
+        "i": 34,
+        "v": "WaterIntensityTheRelevantMetricMayBeSelectedByTheEntity"
+      }
+    ]
+  },
+  {
+    "row": 45,
+    "text": "Note: Indicate if any independent assessment/ evaluation/assurance has been carried out by an external agency?",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Note: Indicate if any independent assessment/ evaluation/assurance has been carried out by an external agency?"
+      },
+      {
+        "i": 26,
+        "v": "AnyIndependentAssessmentOrEvaluationOrAssuranceHasBeenCarriedOutByAnExternalAgencyForWaterWithdrawal"
+      },
+      {
+        "i": 27,
+        "v": "Note: Indicate if any independent assessment/ evaluation/assurance has been carried out by an external\r\nagency?"
+      },
+      {
+        "i": 30,
+        "v": "This is a mandatory field"
+      }
+    ]
+  },
+  {
+    "row": 46,
+    "text": "If yes, name of the external agency.",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "If yes, name of the external agency."
+      },
+      {
+        "i": 26,
+        "v": "NameOfTheExternalAgencyInCaseAnyIndependentAssessmentOrEvaluationOrAssuranceHasBeenCarriedOutByAnExternalAgencyForWaterWithdrawalExplanatoryTextBlock"
+      }
+    ]
+  },
+  {
+    "row": 47,
+    "text": "4. Provide the following details related to water discharged:",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "4. Provide the following details related to water discharged:"
+      }
+    ]
+  },
+  {
+    "row": 48,
+    "text": "Parameter",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Parameter"
+      },
+      {
+        "i": 4,
+        "v": "FY (-)"
+      },
+      {
+        "i": 5,
+        "v": "PY (-)"
+      }
+    ]
+  },
+  {
+    "row": 49,
+    "text": "Water discharge by destination and level of treatment (in kilolitres)",
+    "dataCols": [
+      {
+        "i": 3,
+        "v": "Water discharge by destination and level of treatment (in kilolitres)"
+      }
+    ]
+  }
+]

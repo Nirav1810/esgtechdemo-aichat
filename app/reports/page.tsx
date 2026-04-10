@@ -39,6 +39,69 @@ export default function ReportsPage() {
 
   // Wizard state
   const [formData, setFormData] = useState<BrsrFormData>(DEFAULT_FORM_DATA);
+  const [isRestored, setIsRestored] = useState(false);
+
+  // Load from DB on mount or when year changes
+  useEffect(() => {
+    let active = true;
+    const fetchData = async () => {
+      setIsRestored(false);
+      try {
+        const res = await fetch(`/api/brsr/${encodeURIComponent(selectedYear)}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (!active) return;
+          
+          if (json.exists && json.data) {
+            setPyData(json.data.pyData || DEFAULT_PY_DATA);
+            setFormData(json.data.formData || DEFAULT_FORM_DATA);
+            setIsReportGenerated(!!json.data.isReportGenerated);
+            
+            // Set uploadState success if pyData exists (some basic check)
+            const hasPyData = json.data.pyData && Object.keys(json.data.pyData).length > 0 && json.data.pyData.Revenue;
+            setUploadState(hasPyData ? 'success' : 'idle');
+          } else {
+            // Reset to defaults
+            setPyData(DEFAULT_PY_DATA);
+            setFormData(DEFAULT_FORM_DATA);
+            setIsReportGenerated(false);
+            setUploadState('idle');
+          }
+        }
+      } catch (e) {
+        console.error('Failed to restore BRSR state from DB', e);
+      } finally {
+        if (active) setIsRestored(true);
+      }
+    };
+    fetchData();
+    return () => { active = false; };
+  }, [selectedYear]);
+
+  // Auto-save to DB continuously (debounced)
+  useEffect(() => {
+    if (!isRestored) return;
+    
+    const saveToDb = async () => {
+      try {
+        await fetch(`/api/brsr/${encodeURIComponent(selectedYear)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            pyData,
+            formData,
+            isReportGenerated,
+          })
+        });
+      } catch (e) {
+        console.error('Failed to save BRSR state to DB', e);
+      }
+    };
+
+    const timer = setTimeout(saveToDb, 1500); // 1.5s debounce
+    return () => clearTimeout(timer);
+  }, [isRestored, pyData, formData, isReportGenerated, selectedYear]);
+
 
   /**
    * Handles PDF file selection.
@@ -117,7 +180,7 @@ export default function ReportsPage() {
               setCurrentView={setCurrentView}
               isUploaded={isUploaded}
               step={0}
-              totalSteps={9}
+              totalSteps={13}
               isReportGenerated={isReportGenerated}
             />
           )}

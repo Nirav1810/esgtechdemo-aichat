@@ -164,17 +164,29 @@ waste_incineration          — Incineration
 waste_landfill              — Landfilling
 waste_landfill_incineration — Landfilling after incineration
 
+=== NARRATIVE DISCLOSURES (Text) ===
+theory_q1  — Energy intensity applicability comment
+theory_q2  — Designated Consumers (PAT) details
+theory_q5  — Zero Liquid Discharge (ZLD) mechanism details
+theory_q7  — GHG emissions intensity explanatory notes
+theory_q8  — GHG reduction initiatives details
+theory_q10 — Waste management practices
+theory_q11 — Operations in/around ecologically sensitive areas
+theory_q12 — Environmental impact assessments (EIA) details
+theory_q13 — Environmental compliance details
+
 CRITICAL RULES:
 1. Only return values EXPLICITLY present in the PDF text. Do NOT infer, calculate, or guess.
 2. Skip any row that says "Total", "Intensity", or is clearly a formula row — those are computed.
 3. Revenue and Production are in financial / intensity sections, often separate from the energy table.
 4. Return ONLY a raw JSON object with the exact keys above. No markdown, no explanation.
-5. All values must be plain numbers. Use 0 for anything not found.
+5. Numeric values must be plain numbers. Use 0 for anything not found.
+6. Narrative values (theory_qX) must be the actual descriptive text from the PDF. Use "" if not found.
 
-ANTI-HALLUCINATION: If uncertain, return 0. Wrong zeros are correctable; hallucinated numbers are not.
+ANTI-HALLUCINATION: If uncertain, return 0 or "". Wrong zeros are correctable; hallucinated information is not.
 
 Example output (abbreviated):
-{"energy_A":51268,"energy_B":454852,"energy_C":0,"energy_D":128000,"energy_E":657562,"energy_F":0,"Revenue":0,"Production":0,"water_surface":2329406,"water_ground":173115,"water_thirdparty":178252,"water_seawater":0,"water_others":0,"water_consumption":4730690,"wd_surface_notx":0,"wd_surface_tx":0,"wd_ground_notx":0,"wd_ground_tx":0,"wd_sea_notx":0,"wd_sea_tx":0,"wd_third_notx":24237,"wd_third_tx":0,"wd_others_notx":0,"wd_others_tx":0,"air_nox":73,"air_sox":7,"air_pm":18,"ghg_scope1":61501,"ghg_scope2":37282,"waste_A":1139,"waste_B":65,"waste_C":11,"waste_D":0,"waste_E":3,"waste_F":0,"waste_G":790,"waste_H":7193,"waste_recycled":6875,"waste_reused":0,"waste_recovery_other":2251,"waste_incineration":3,"waste_landfill":77,"waste_landfill_incineration":0}`;
+{"energy_A":51268,"energy_B":454852,"theory_q2":"TCPL operates in a sector that does not fall under the classification of designated consumers (DCs)...","waste_landfill":77}`;
 
   const userMessage = `Here is the extracted text from the BRSR PDF. Extract ONLY the Previous Year (PY / FY2024) values:\n\n${truncated}`;
 
@@ -249,6 +261,11 @@ Example output (abbreviated):
     return typeof v === "number" && isFinite(v) ? v : 0;
   };
 
+  const s = (key: string): string => {
+    const v = parsed[key];
+    return typeof v === "string" ? v.trim() : "";
+  };
+
   return {
     // Q1 Energy
     energy_A: n("energy_A"), energy_B: n("energy_B"), energy_C: n("energy_C"),
@@ -279,6 +296,10 @@ Example output (abbreviated):
     // Q9 Waste Disposal
     waste_incineration: n("waste_incineration"), waste_landfill: n("waste_landfill"),
     waste_landfill_incineration: n("waste_landfill_incineration"),
+    // Theory
+    theory_q1: s("theory_q1"), theory_q2: s("theory_q2"), theory_q3: s("theory_q3"), theory_q4: s("theory_q4"),
+    theory_q5: s("theory_q5"), theory_q6: s("theory_q6"), theory_q7: s("theory_q7"), theory_q8: s("theory_q8"), theory_q9: s("theory_q9"),
+    theory_q10: s("theory_q10"), theory_q11: s("theory_q11"), theory_q12: s("theory_q12"), theory_q13: s("theory_q13"),
   };
 }
 

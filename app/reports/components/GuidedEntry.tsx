@@ -182,20 +182,30 @@ function QuestionWizard({
                   </>
                 ) : (
                   <>
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="Enter value…"
-                      value={formData[currentField.key] ?? ''}
-                      onChange={e => {
-                        // Allow only numeric input (digits, decimal point, minus)
-                        const raw = e.target.value.replace(/[^0-9.-]/g, '');
-                        onUpdate(currentField.key, raw);
-                      }}
-                      onKeyDown={e => { if (e.key === 'Enter') handleNext(); }}
-                      className="w-full text-3xl font-black text-slate-800 bg-transparent border-none outline-none placeholder:text-slate-300"
-                    />
+                    {currentField.category === 'theory' ? (
+                      <textarea
+                        ref={inputRef as any}
+                        placeholder="Enter response…"
+                        value={formData[currentField.key] ?? ''}
+                        onChange={e => onUpdate(currentField.key, e.target.value)}
+                        className="w-full h-32 resize-none text-base font-medium text-slate-800 bg-transparent border-none outline-none placeholder:text-slate-300"
+                      />
+                    ) : (
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="Enter value…"
+                        value={formData[currentField.key] ?? ''}
+                        onChange={e => {
+                          // Allow only numeric input (digits, decimal point, minus)
+                          const raw = e.target.value.replace(/[^0-9.-]/g, '');
+                          onUpdate(currentField.key, raw);
+                        }}
+                        onKeyDown={e => { if (e.key === 'Enter') handleNext(); }}
+                        className="w-full text-3xl font-black text-slate-800 bg-transparent border-none outline-none placeholder:text-slate-300"
+                      />
+                    )}
                     <p className="text-xs text-slate-400 mt-1">{currentField.unit}</p>
                   </>
                 )}
@@ -290,7 +300,7 @@ export default function GuidedEntry({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'BRSR_P6_Template_FY2024-25.xlsx';
+      a.download = 'SEBI_BRSR_Template.xlsm';
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -351,7 +361,7 @@ export default function GuidedEntry({
         <div className="max-w-5xl mx-auto flex items-center gap-6">
           <div className="flex-1">
             <h1 className="text-lg font-extrabold text-slate-800">Principle 6 — Environment</h1>
-            <p className="text-xs text-slate-500">BRSR Essential Indicators · 9 questions · {overallPct}% complete</p>
+            <p className="text-xs text-slate-500">BRSR Essential Indicators · 13 questions · {overallPct}% complete</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-sm text-slate-600">
@@ -424,7 +434,7 @@ export default function GuidedEntry({
               <input
                 ref={excelInputRef}
                 type="file"
-                accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                accept=".xlsx,.xlsm,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12"
                 onChange={handleExcelUpload}
                 className="hidden"
               />

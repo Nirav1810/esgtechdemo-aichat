@@ -1,0 +1,253 @@
+% of your plants and offices that were assessed 
+(by entity or statutory authorities or third parties)
+Child labour 100%
+Forced/involuntary labour 100%
+Sexual harassment 100%
+Discrimination at workplace 100%
+Wages 100%10. Assessments of the year
+ All our locations on monthly basis submit Compliance Certificate which is documented in Legatix and compiled and 
+presented to the board every quarter.
+11. Provide details of any corrective actions taken or underway to address significant risks / concerns arising from 
+the assessments at Question 10 above. 
+ There were no significant risks / concerns arising from the above assessments.
+1. Details of total energy consumption (in Joules or multiples) and energy intensity, in the following format: 
+ParameterUnit of 
+measurementFY2025
+Current financial Year FY2024
+Previous financial Year
+From renewable sources
+Total electricity consumption (A) GJ 114812 51268
+Total fuel consumption (B) GJ 860147 454852
+Energy consumption through other sources (C) GJ 0 0
+Total energy consumed from renewable sources 
+(A+B+C)GJ 974959 506120
+From non-renewable sources
+Total electricity consumption (D) GJ 366909 128000
+Total fuel consumption (E) GJ 526691 657562
+Energy consumption through other sources (F) GJ 0 0
+Total energy consumed from non-renewable sources 
+(D+E+F)GJ 893600 785562
+Total energy consumed (A+B+C+D+E+F) GJ 1868559 1291682
+Energy intensity per rupee of turnover  
+(Total energy consumed / Revenue from operations)GJ/Cr. Rs. 106.06 124.74Businesses should respect and make efforts to protect and restore the environmentPrinciple
+Essential Indicators
+Note: We are consistently upgrading our data capturing mechanisms in order to make reliable and transparent Sustainability 
+disclosures. Owing to this, we have revisited some of our previous recorded performance numbers to present more accurate 
+position. Accordingly, we have revised the data points in water withdrawal for FY24 to reflect these modifications and accurately 
+capture our conservation efforts. The figures for FY24 appearing in this report may be considered the most updated and accurate 
+representation for the said year for TCPL India operation boundary.
+29
+
+ Note: Indicate if any independent assessment/ evaluation/assurance has been carried out by an external agency? (Y/N) If 
+yes, name of the external agency
+ Yes. The energy consumption data and energy intensity data are audited and verified by British Standards Institution (BSI) 
+as part of ‘Reasonable Assurance’ for the BRSR.
+2. Does the entity have any sites / facilities identified as designated consumers (DCs) under the Performance, Achieve 
+and Trade (PAT) Scheme of the Government of India? (Y/N) If yes, disclose whether targets set under the PAT 
+scheme have been achieved. In case targets have not been achieved, provide the remedial action taken, if any.
+ TCPL operates in a sector that does not fall under the classification of designated consumers (DCs), and as such, none of its 
+sites are included in the Performance, Achieve, and Trade (PAT) scheme.ParameterUnit of 
+measurementFY2025
+Current financial Year FY2024
+Previous financial Year
+Energy intensity per rupee of turnover adjusted for 
+Purchasing Power Parity (PPP) (Total energy consumed / 
+Revenue from operations adjusted for PPP)GJ/million USD 219.12 130.05
+Energy intensity in terms of physical output - Production GJ/MT 0.84 5.69
+Energy intensity (optional) – the relevant metric may be 
+selected by the entity- - -
+3. Provide details of the following disclosures related to water, in the following format:
+ParameterUnit of 
+measurementFY2025  
+Current financial Year FY2024 
+Previous financial Year
+Water withdrawal by source (in kiloliters)
+(i) Surface water kL 2847221 2329406
+(ii) Groundwater kL 320917 173115
+(iii) Third party water (Municipal water supplies) kL 847479 178252
+(iv) Seawater / desalinated water kL 0 0
+(v) Others kL 0 0
+Total volume of water withdrawal (i + ii + iii + iv + v) kL 4015617 2680773
+Total volume of water consumption kL 6532755 4730690
+Water intensity per rupee of turnover kL/Cr. Rs. 370.79 456.85
+Water intensity per rupee of turnover adjusted for 
+Purchasing Power Parity (PPP) kL/million USD 766.06 476.29
+Water intensity in terms of physical output kL/MT 2.95 20.83
+Water intensity (optional) – the relevant metric may be 
+selected by the entity- - -
+ Note: Indicate if any independent assessment/ evaluation/assurance has been carried out by an external agency? (Y/N) If 
+yes, name of the external agency
+ Yes. BSI Group India Pvt. Ltd has conducted an independent assurance.
+30
+
+ParameterFY2025  
+Current financial Year FY2024 
+Previous financial Year
+Water discharge by destination and level of treatment (in kilo liters)
+(i) To Surface water
+ - No treatment 0 0
+ - With treatment – please specify level of treatment 197 0
+(ii) To Groundwater
+ - No treatment 5632 0
+ - With treatment – please specify level of treatment 0 0
+(iii) To Seawater
+ - No treatment 0 0
+ - With treatment – please specify level of treatment 0 0
+(iv) Sent to third parties
+ - No treatment* 2356 24237
+ - With treatment – please specify level of treatment 0 0
+(v) Others
+ - No treatment 30 0
+ - With treatment – Tertiary treatment 24917 0
+Total water discharged (in kilo liters) 33132 24237
+ *Discharged to common Effluent Treatment Plant. 
+ Note: Indicate if any independent assessment/ evaluation/assurance has been carried out by an external agency? (Y/N) If 
+yes, name of the external agency
+ Yes. BSI Group India Pvt. Ltd has conducted an independent assurance.
+5. Has the entity implemented a mechanism for Zero Liquid Discharge? If yes, provide details of its coverage and 
+implementation. 
+ No. Some manufacturing units treat their wastewater internally using sewage treatment plants (STPs). This treated water 
+is then recycled and used for landscaping and irrigation purposes.
+6. Please provide details of air emissions (other than GHG emissions) by the entity, in the following format *: 
+ParameterPlease specify 
+unitFY2025
+Current financial Year FY2024
+Previous financial Year
+NOx MT 418 73
+SOx MT 34 7
+Particulate matter (PM) MT 161 18
+Persistent organic pollutants (POP) NA NA NA
+Volatile organic compounds (VOC) NA NA NA
+Hazardous air pollutants (HAP) NA NA NA
+ Note: Indicate if any independent assessment/ evaluation/assurance has been carried out by an external agency? (Y/N) If 
+yes, name of the external agency.
+ Yes. BSI Group India Pvt. Ltd has conducted an independent assurance (‘Reasonable Assurance’ for the BRSR).4. Provide the following details related to water discharged:
+31
+
+Parameter UnitFY2025
+Current financial Year FY2024
+Previous financial Year
+Total Scope 1 emissions* (Break-up of the GHG 
+into CO2, CH4, N2O, HFCs, PFCs, SF6, NF3, if 
+available)Metric tons of CO2 
+equivalent64943 61501
+Total Scope 2 emissions (Break-up of the GHG 
+into CO2, CH4, N2O, HFCs, PFCs, SF6, NF3, if 
+available)Metric tons of CO2 
+equivalent71211 37282
+Total Scope 1 and Scope 2 emissions Metric tons of CO2 
+equivalent136154 98782
+Total Scope 1 and Scope 2 emission intensity 
+per rupee of turnover (Total Scope 1 and Scope 
+2 GHG emissions / Revenue from operations)Metric tons of CO2 
+equivalent/ Cr. Rs.7.73 9.54
+Total Scope 1 and Scope 2 emission intensity 
+per rupee of turnover adjusted for Purchasing 
+Power Parity (PPP) (Total Scope 1 and Scope 
+2 GHG emissions / Revenue from operations 
+adjusted for PPP)Metric tons of CO2 
+equivalent / 
+million USD15.97 9.95
+Total Scope 1 and Scope 2 emission intensity 
+in terms of physical outputMetric tons of CO2 
+equivalent/Metric ton 
+of production0.06 0.43
+ *Excluding refrigerants fillings, CO2 filling, STP emission.
+ Note: Indicate if any independent assessment/ evaluation/assurance has been carried out by an external agency? (Y/N) If 
+yes, name of the external agency.
+ Yes. BSI Group India Pvt. Ltd has conducted an independent assurance.
+8. Does the entity have any project related to reducing Green House Gas emission? If Yes, then provide details. 
+ Yes, TCP has projects related to reducing Greenhouse Gas emissions, particularly through the utilization of alternate 
+sources of energy.
+ Our direct emissions come from various fuel sources, including biomass, diesel, petrol, furnace oil, coal, LPG, kerosene etc. 
+used in operational processes. The indirect energy requirements are met through grid electricity, with a strong emphasis on 
+leveraging solar power for off-grid configurations, which contributes to greening the energy portfolio. This year, 24% of the 
+power demand was met through renewable sources, including wind and solar energy, further supporting the reduction of 
+greenhouse gas emissions.
+ The ICD Theni facility has successfully commissioned an additional 500 KWp solar power plant, complementing the existing 
+1000 KWp plant. This enhancement brings the total solar capacity to 1.5 MWp, marking a significant step in the commitment 
+to sustainable energy practices. Also, In FY 2024-25, we met 62% of its direct energy needs through bio-based fuels such as 
+firewood, biomass pellets, spent tea waste, briquettes, and husk. This reflects a commitment to adopting energy solutions 
+that are efficient and environmentally friendly.7. Provide details of greenhouse gas emissions (Scope 1 and Scope 2 emissions) & its intensity, in the following 
+format: 
+32
+
+ These initiatives demonstrate our dedication to reducing greenhouse gas emissions and transitioning towards more 
+sustainable energy solutions.
+ For more information on the measures mentioned above, please refer to Annexure 5 of the Board's Report.
+9. Provide details related to waste management by the entity, in the following format:
+ParameterFY2025  
+Current financial Year FY2024 
+Previous financial Year
+Total Waste generated (in metric tons)
+Plastic waste (A) 6491 1139
+E-waste (B) 1 65
+Bio-medical waste (C) 143 11
+Construction and demolition waste (D) 82 0
+Battery waste (E) 10 3
+Radioactive waste (F) 0 0
+Other Hazardous waste (G)  – Used oil, used ink bottles, empty chemical 
+containers, etc. 2248 790
+Other Non-hazardous waste generated (H) – Metal scrap, bottom ash, etc. 15090 7193
+Total (A+B + C + D + E + F + G + H) 24233 9203
+Waste intensity per crore rupees of Turnover (Total waste generated / 
+Revenue from operations in Cr. Rs.)1.38 0.89
+Waste intensity per million USD of turnover adjusted for Purchasing 
+Power Parity (PPP) (Total waste generated / Revenue from operations 
+adjusted for PPP in million USD)2.84 0.93
+Waste intensity in terms of physical output – Metric tons of waste/Metric 
+ton of production0.01 0.04
+Waste intensity (optional) – the relevant metric may be selected by the 
+entity- -
+For each category of waste generated, total waste recovered through recycling,  
+re-using or other recovery operations (in metric tons)
+Category of waste
+(i) Recycled 21733 6875
+(ii) Re-used 0 0.4
+(iii) Other recovery operations 2248 2251
+Total 23980 9126
+For each category of waste generated, total waste disposed by nature of disposal method (in metric tons)
+Category of waste*
+(i) Incineration 143 3
+(ii) Landfilling 110 77
+(iii) Landfilling after incineration 0 0
+Total 253 80
+33
+
+S. 
+No.Location of operations/offices Type of operationsWhether the conditions of environmental approval 
+/ clearance are being complied with? (Y/N) If no, the 
+reasons thereof and corrective action taken, if any.
+Not Applicable
+S. 
+No.Specify the law / regulation 
+/ guidelines which was not 
+complied withProvide details of 
+the non-complianceAny fines / penalties / action taken 
+by regulatory agencies such as 
+pollution control boards or by courtsCorrective action  
+taken, if any
+Not ApplicableName and brief 
+details of projectEIA Notification 
+No.DateWhether conducted by 
+independent external 
+agency (Yes / No)Results communicated in 
+public domain (Yes / No)Relevant  
+Web link
+Not Applicable10. Briefly describe the waste management practices adopted in your establishments. Describe the strategy adopted 
+by your company to reduce usage of hazardous and toxic chemicals in your products and processes and the 
+practices adopted to manage such wastes.
+ At TCPL, we follow the 3Rs approach—reduce, reuse, and recycle—to manage waste effectively. Moreover, we have 
+eliminated the use of hazardous and toxic chemicals in both our products and processes. Waste is carefully sorted according 
+to legal requirements (domestic waste, hazardous waste, and industrial waste) and disposed of responsibly.
+11. If the entity has operations/offices in/around ecologically sensitive areas (such as national parks, wildlife 
+sanctuaries, biosphere reserves, wetlands, biodiversity hotspots, forests, coastal regulation zones etc.) where 
+environmental approvals / clearances are required, please specify details in the following format: 
+12. Details of environmental impact assessments of projects undertaken by the entity based on applicable laws, in 
+the current financial year: 
+13. Is the entity compliant with the applicable environmental law/ regulations/ guidelines in India; such as the Water 
+(Prevention and Control of Pollution) Act, Air (Prevention and Control of Pollution) Act, Environment protection 
+act and rules thereunder (Y/N). If not, provide details of all such non-compliances, in the following format: 
+ Yes. The company is compliant with all the applicable laws.
+34
+

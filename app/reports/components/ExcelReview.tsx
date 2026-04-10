@@ -108,7 +108,7 @@ function FieldRow({ step, fyValue, pyValue, isFormula, isAlternate, onChange }: 
       {/* PY value — always read-only */}
       <div className="flex justify-end">
         <span className="text-sm text-slate-400 font-mono select-none">
-          {pyValue !== 0 ? pyValue.toLocaleString('en-IN') : '—'}
+          {pyValue ? pyValue.toLocaleString('en-IN') : '—'}
         </span>
       </div>
     </div>
@@ -127,10 +127,10 @@ function ComputedRow({ label, fyVal, pyVal, unit, grand = false }: {
       <span className={`text-sm font-bold ${grand ? 'text-emerald-900' : 'text-emerald-800'}`}>{label}</span>
       <span className="text-center text-xs text-slate-400 font-mono">{unit}</span>
       <span className={`text-right text-sm font-bold font-mono ${grand ? 'text-emerald-700' : 'text-emerald-600'}`}>
-        {fyVal !== 0 ? fyVal.toLocaleString('en-IN') : '0'}
+        {fyVal ? fyVal.toLocaleString('en-IN') : '0'}
       </span>
       <span className="text-right text-sm text-slate-400 font-mono">
-        {pyVal !== 0 ? pyVal.toLocaleString('en-IN') : '—'}
+        {pyVal ? pyVal.toLocaleString('en-IN') : '—'}
       </span>
     </div>
   );

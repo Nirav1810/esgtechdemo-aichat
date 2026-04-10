@@ -68,6 +68,21 @@ export interface PyData {
   waste_incineration: number;
   waste_landfill: number;
   waste_landfill_incineration: number;
+
+  // Theory Questions
+  theory_q1: string;
+  theory_q2: string;
+  theory_q3: string;
+  theory_q4: string;
+  theory_q5: string;
+  theory_q6: string;
+  theory_q7: string;
+  theory_q8: string;
+  theory_q9: string;
+  theory_q10: string;
+  theory_q11: string;
+  theory_q12: string;
+  theory_q13: string;
 }
 
 export const DEFAULT_PY_DATA: PyData = {
@@ -87,6 +102,9 @@ export const DEFAULT_PY_DATA: PyData = {
   waste_E: 0, waste_F: 0, waste_G: 0, waste_H: 0,
   waste_recycled: 0, waste_reused: 0, waste_recovery_other: 0,
   waste_incineration: 0, waste_landfill: 0, waste_landfill_incineration: 0,
+  theory_q1: '', theory_q2: '', theory_q3: '', theory_q4: '',
+  theory_q5: '', theory_q6: '', theory_q7: '', theory_q8: '', theory_q9: '',
+  theory_q10: '', theory_q11: '', theory_q12: '', theory_q13: '',
 };
 
 // ─── Current-Year Form Data (wizard entries) ─────────────────────────────────
@@ -344,6 +362,18 @@ export const STEPS_CONFIG: StepConfig[] = [
   { key: 'waste_incineration',           section: 'Q9', unit: 'MT', category: 'waste disposal', title: '(i) Incineration', tip: 'Waste sent for thermal destruction.' },
   { key: 'waste_landfill',               section: 'Q9', unit: 'MT', category: 'waste disposal', title: '(ii) Landfilling', tip: 'Waste disposed in controlled or uncontrolled landfills.' },
   { key: 'waste_landfill_incineration',  section: 'Q9', unit: 'MT', category: 'waste disposal', title: '(iii) Other disposal operations', tip: 'Any other disposal method (e.g. landfilling after incineration, co-processing). Matches Excel row 122.' },
+
+  // ── Theory Questions ─────────────────────────────────────────────────────
+  { key: 'theory_q1', section: 'Q1', unit: '', category: 'theory', title: 'Energy Intensity Applicability', tip: 'Whether total energy consumption and energy intensity is applicable to the company?' },
+  { key: 'theory_q2', section: 'Q2', unit: '', category: 'theory', title: 'Designated Consumers (DCs)', tip: 'Does the entity have any sites / facilities identified as designated consumers (DCs) under PAT scheme?' },
+  { key: 'theory_q5', section: 'Q5', unit: '', category: 'theory', title: 'ZLD Mechanism', tip: 'Provide details of Zero Liquid Discharge Mechanism if applicable' },
+  { key: 'theory_q7', section: 'Q7', unit: '', category: 'theory', title: 'GHG Emissions details', tip: 'Provide details of greenhouse gas emissions' },
+  { key: 'theory_q8', section: 'Q8', unit: '', category: 'theory', title: 'GHG Reduction Initiatives', tip: 'Does the entity have any project / initiative undertaken to reduce greenhouse gas emissions?' },
+  { key: 'theory_q9', section: 'Q9', unit: '', category: 'theory', title: 'Waste Management details (optional)', tip: 'Provide generic detail of waste management here if requested' },
+  { key: 'theory_q10', section: 'Q10', unit: '', category: 'theory', title: 'Waste Management Practices', tip: 'Briefly describe the waste management practices adopted in your establishments.' },
+  { key: 'theory_q11', section: 'Q11', unit: '', category: 'theory', title: 'Ecologically Sensitive Areas', tip: 'Operations/offices in/around ecologically sensitive areas.' },
+  { key: 'theory_q12', section: 'Q12', unit: '', category: 'theory', title: 'EIA Projects', tip: 'Details of environmental impact assessments of projects undertaken.' },
+  { key: 'theory_q13', section: 'Q13', unit: '', category: 'theory', title: 'Environmental Compliance', tip: 'Is the entity compliant with the applicable environmental law/regulations/guidelines.' },
 ];
 
 // Keys that are formula/derived (read-only in forms)
@@ -369,57 +399,81 @@ export interface QuestionConfig {
 export const QUESTIONS_CONFIG: QuestionConfig[] = [
   {
     number: 1, section: 'Q1',
-    title: 'Energy Consumption & Intensity',
-    description: 'Total energy from renewable and non-renewable sources, plus energy intensity metrics per rupee of turnover and per unit of production.',
+    title: 'Details of total energy consumption (in Joules or multiples) and energy intensity, in the following format:',
+    description: 'Total energy from renewable and non-renewable sources, plus energy intensity metrics.',
     icon: 'bolt', color: 'emerald', hasTable: true, fields: [],
   },
   {
     number: 2, section: 'Q2',
-    title: 'PAT Scheme — Designated Consumers',
-    description: 'Whether any sites are identified as designated consumers under the Performance, Achieve and Trade (PAT) scheme.',
-    icon: 'verified', color: 'slate', hasTable: false, fields: [],
+    title: 'Does the entity have any sites / facilities identified as designated consumers (DCs) under the Performance, Achieve and Trade (PAT) Scheme of the Government of India? (Y/N) If yes, disclose whether targets set under the PAT scheme have been achieved. In case targets have not been achieved, provide the remedial action taken, if any.',
+    description: 'Designated consumers (PAT) disclosure.',
+    icon: 'verified', color: 'slate', hasTable: true, fields: [],
   },
   {
     number: 3, section: 'Q3',
-    title: 'Water Withdrawal & Consumption',
-    description: 'Volume of water withdrawn by source (surface, ground, third-party, seawater), total consumption, and water intensity metrics.',
+    title: 'Provide details of the following disclosures related to water, in the following format:',
+    description: 'Volume of water withdrawn by source, total consumption, and water intensity metrics.',
     icon: 'water_drop', color: 'blue', hasTable: true, fields: [],
   },
   {
     number: 4, section: 'Q4',
-    title: 'Water Discharge by Destination',
-    description: 'Volume of water discharged to surface water, groundwater, seawater, and third parties, split by treatment level.',
+    title: 'Provide the following details related to water discharged:',
+    description: 'Water discharge by destination and level of treatment.',
     icon: 'water', color: 'cyan', hasTable: true, fields: [],
   },
   {
     number: 5, section: 'Q5',
-    title: 'Zero Liquid Discharge Mechanism',
-    description: 'Whether a Zero Liquid Discharge (ZLD) mechanism has been implemented, and coverage details.',
-    icon: 'recycling', color: 'slate', hasTable: false, fields: [],
+    title: 'Has the entity implemented a mechanism for Zero Liquid Discharge? If yes, provide details of its coverage and implementation.',
+    description: 'Implementation and coverage details of ZLD mechanism.',
+    icon: 'recycling', color: 'slate', hasTable: true, fields: [],
   },
   {
     number: 6, section: 'Q6',
-    title: 'Air Emissions (Non-GHG)',
-    description: 'Emissions of NOx, SOx, particulate matter, persistent organic pollutants, VOCs, and hazardous air pollutants.',
+    title: 'Please provide details of air emissions (other than GHG emissions) by the entity, in the following format *:',
+    description: 'Emissions of NOx, SOx, particulate matter, etc.',
     icon: 'air', color: 'orange', hasTable: true, fields: [],
   },
   {
     number: 7, section: 'Q7',
-    title: 'GHG Emissions & Intensity',
-    description: 'Scope 1 and Scope 2 greenhouse gas emissions in tCO₂Eq, and GHG intensity per rupee of turnover and per unit of production.',
+    title: 'Provide details of greenhouse gas emissions (Scope 1 and Scope 2 emissions) & its intensity, in the following format:',
+    description: 'Scope 1 and Scope 2 GHG emissions in tCO₂Eq and intensity metrics.',
     icon: 'co2', color: 'red', hasTable: true, fields: [],
   },
   {
     number: 8, section: 'Q8',
-    title: 'GHG Reduction Initiatives',
-    description: 'Projects and initiatives undertaken to reduce greenhouse gas emissions during the reporting period.',
-    icon: 'eco', color: 'slate', hasTable: false, fields: [],
+    title: 'Does the entity have any project related to reducing Green House Gas emission? If Yes, then provide details.',
+    description: 'Projects and initiatives undertaken to reduce greenhouse gas emissions.',
+    icon: 'eco', color: 'slate', hasTable: true, fields: [],
   },
   {
     number: 9, section: 'Q9',
-    title: 'Waste Management',
-    description: 'Total waste generated by category (A–H), waste diverted through recovery operations, and waste disposed by method.',
+    title: 'Provide details related to waste management by the entity, in the following format:',
+    description: 'Total waste generated, waste recovery operations, and waste disposal methods.',
     icon: 'delete_sweep', color: 'purple', hasTable: true, fields: [],
+  },
+  {
+    number: 10, section: 'Q10',
+    title: 'Briefly describe the waste management practices adopted in your establishments. Describe the strategy adopted by your company to reduce usage of hazardous and toxic chemicals in your products and processes and the practices adopted to manage such wastes.',
+    description: 'Waste management practices and toxic chemical strategy.',
+    icon: 'recycling', color: 'slate', hasTable: true, fields: [],
+  },
+  {
+    number: 11, section: 'Q11',
+    title: 'If the entity has operations/offices in/around ecologically sensitive areas (such as national parks, wildlife sanctuaries, biosphere reserves, wetlands, biodiversity hotspots, forests, coastal regulation zones etc.) where environmental approvals / clearances are required, please specify details in the following format:',
+    description: 'Details of operations in sensitive areas.',
+    icon: 'park', color: 'slate', hasTable: true, fields: [],
+  },
+  {
+    number: 12, section: 'Q12',
+    title: 'Details of environmental impact assessments of projects undertaken by the entity based on applicable laws, in the current financial year:',
+    description: 'Details of EIA of projects undertaken.',
+    icon: 'assessment', color: 'slate', hasTable: true, fields: [],
+  },
+  {
+    number: 13, section: 'Q13',
+    title: 'Is the entity compliant with the applicable environmental law / regulations / guidelines in India; such as the Water (Prevention and Control of Pollution) Act, Air (Prevention and Control of Pollution) Act, Environment protection act and rules thereunder (Y/N). If not, provide details of all such non-compliances, in the following format:',
+    description: 'Compliance with environmental laws and non-compliance details.',
+    icon: 'gavel', color: 'slate', hasTable: true, fields: [],
   },
 ].map(q => ({
   ...q,
