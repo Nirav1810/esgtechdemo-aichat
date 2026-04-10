@@ -379,7 +379,7 @@ export default function ESGDashboard() {
                 </p>
               </div>
               <Link
-                href="/reports"
+                href="/brsr"
                 className="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md transition-all flex items-center gap-2"
                 style={{ backgroundColor: '#006d43', color: 'white' }}
               >

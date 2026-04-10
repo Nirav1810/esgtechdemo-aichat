@@ -13,7 +13,7 @@ interface HeaderProps {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   yearOptions: string[];
-  activePage?: "dashboard" | "ghg-reports" | "edit-data" | "reports";
+  activePage?: "dashboard" | "ghg-reports" | "edit-data" | "brsr";
   onAskAIClick?: () => void;
   showBaseline?: boolean;
 }
@@ -82,8 +82,8 @@ export default function Header({
                 GHG Reports
               </Link>
               <Link
-                href="/reports"
-                className={getNavClass("reports")}
+                href="/brsr"
+                className={getNavClass("brsr")}
               >
                 BRSR Reports
               </Link>
