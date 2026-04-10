@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from "../components/Header";
 import DataUpload from "./components/DataUpload";
 import GuidedEntry from "./components/GuidedEntry";
@@ -21,6 +22,7 @@ const setView = (setter: React.Dispatch<React.SetStateAction<ReportView>>) =>
   (v: ReportView) => setter(v);
 
 export default function ReportsPage() {
+  const router = useRouter();
   const [currentView, setCurrentView] = useState<ReportView>('overview');
 
   // Header state
@@ -48,6 +50,11 @@ export default function ReportsPage() {
       setIsRestored(false);
       try {
         const res = await fetch(`/api/brsr/${encodeURIComponent(selectedYear)}`);
+        if (res.status === 401) {
+          // Session expired or user not logged in — redirect to login
+          router.push('/login');
+          return;
+        }
         if (res.ok) {
           const json = await res.json();
           if (!active) return;
@@ -61,7 +68,7 @@ export default function ReportsPage() {
             const hasPyData = json.data.pyData && Object.keys(json.data.pyData).length > 0 && json.data.pyData.Revenue;
             setUploadState(hasPyData ? 'success' : 'idle');
           } else {
-            // Reset to defaults
+            // Reset to defaults for a new user/year
             setPyData(DEFAULT_PY_DATA);
             setFormData(DEFAULT_FORM_DATA);
             setIsReportGenerated(false);
